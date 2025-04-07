@@ -1,0 +1,119 @@
+from rest_framework import viewsets
+from modules.administration.models import *
+from modules.users.models import *
+from api.v1.module.serializers.exam_serializer import *
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+import math
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from api.v1.module.response_handler import *
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
+from api.v1.module.serializers.student_serializer import *
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError , NotFound
+
+
+class ExamPagination(PageNumberPagination):
+    page_size = 10
+    def get_paginated_response(self, data):
+        total_items = self.page.paginator.count
+        if not total_items:
+            return Response({'message':'Exam no found' , 'code':400 , 'data':{} , 'extra':{}})
+        if self.page_size:
+            total_page = math.ceil(total_items/self.page_size)
+        message = "Exam List fetch successfully"
+        return Response({'message':message , 'code': 200 , 'data':data})
+
+class ExamModelViewSet(viewsets.ModelViewSet):
+    queryset = Exam.objects.all().order_by('-id')
+    serializer_class = ExamSerializer
+    pagination_class = ExamPagination
+    http_method_names = ['get' , 'post' , 'put' , 'delete']
+    filter_backends =[SearchFilter , DjangoFilterBackend]
+    filterset_fields = []
+
+
+    def get_queryset(self):
+        try:
+            return super().get_queryset()
+        except:
+            message = "Exam no found"
+            return response_handler(message= message , code = 400 , data={})
+        
+    def create(self, request, *args, **kwargs):
+        try:
+            response = super().create(request , *args , **kwargs)
+            message = "Exam create successfully"
+            return response_handler(message=message , code = 200  , data =  response.data)
+        except ValidationError as e:
+            return response_handler( message=format_serializer_errors(e.detail), code=400,data={})
+        except Exception as e:
+            if isinstance(e.args[0], dict):  
+                formatted_errors = format_serializer_errors(e.args[0])
+                return response_handler(message=formatted_errors[0], code=400, data={})
+            else:
+                return response_handler(message=str(e), code=400, data={})
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer =  self.serializer_class(instance , data = request.data , partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            message = "Exam Updated successfully"
+            return response_handler(message = message , code = 200 , data = serializer.data)
+        message = "Something went wrong"
+        return response_handler(message=message , code = 400 , data = {})
+    
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            response = self.get_serializer(instance )
+            message = "Exam data retrived successfully"
+            return response_handler(message = message , code = 200 , data = response.data)
+        except NotFound:
+            return response_handler(message="Exam No found" , code = 400 , data={})
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            message = "Exam deleted successfully"
+            return response_handler(message = message , code = 200 , data = {})
+        except:
+            message = "Exam no found"
+            return response_handler(message=message , code = 400 , data = {})
+
+    @action(detail= True , methods=['post'])
+    def active(self, request , pk= None):
+        instance = self.get_object()
+        serializer = ExamActiveSerializer(instance , data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            if request.data.get('is_active'):
+                message = "Exam active successfully"
+                return response_handler(message = message , code = 200 , data = {})
+            else:
+                message = "Exam Inactive Successfully"
+                return response_handler(message = message , code = 200 , data = {})
+        message = "Exam no found"
+        return response_handler(message=message , code = 400  , data ={})
+    
+    @action(detail=True , methods=['post'])
+    def cancel(self, request , pk = None):
+        instance = self.get_object()
+        serializer = ExamCancelSerializer(instance , data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+            if request.data.get('is_cancel'):
+                message = "Exam Cancel successfully"
+                return response_handler(message=message , code = 200 , data={})
+            else:
+                message = "Exam Permit successfully"
+                return response_handler(message=message , code = 200 , data= {})
+        message = "Exam No found"
+        return response_handler(message=message , code = 400  , data={})
+        
+
+
