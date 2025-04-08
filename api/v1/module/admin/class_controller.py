@@ -176,7 +176,7 @@ class ClassAttendanceAPIView(APIView):
         student_serializer = StudentMixSerializer(instance = students , many = True)
         student_attendance = {attendance.student.id : attendance.is_persent for attendance in Attendance.objects.filter(class_schedule = class_id)}
         for student in student_serializer.data:
-            student['is_persent'] = student_attendance.get(student['id'] , False)
+            student['is_persent'] = student_attendance.get(student['id'] , True)
         message = "class wise student list fetch successfully"
         return response_handler(message = message , code = 200  , data = student_serializer.data)
     
