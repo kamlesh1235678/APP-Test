@@ -87,8 +87,8 @@ class ComponentMixListSerializer(serializers.ModelSerializer):
     def get_is_marks_add_status(self, obj):
         if obj.is_submission:
             current_time = now()
-            if obj.end_date:
-                return current_time > obj.end_date
+            if obj.start_date:
+                return current_time > obj.start_date
             return False
         return True
 
@@ -110,8 +110,8 @@ class SubComponentMixListSerializer(serializers.ModelSerializer):
     def get_is_marks_add_status(self, obj):
         if obj.is_submission:
             current_time = now()
-            if obj.end_date:
-                return current_time > obj.end_date
+            if obj.start_date:
+                return current_time > obj.start_date
             return False
         return False
         
