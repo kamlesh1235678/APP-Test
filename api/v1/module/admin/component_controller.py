@@ -106,8 +106,14 @@ class SubComponentAPIView(APIView):
             return response_handler(message= 'Mismatch: Total marks and component marks sum are not equal !.' , code = 400  , data = {})
         SubComponent.objects.filter(component = component_id).delete()
         for x in requested_subcomponent_data:
-            subcomponent = SubComponent.objects.create(component = component
-                                    ,name = x['name'] , max_marks =  x['max_marks'] , description = x['description'])
+            subcomponent = SubComponent.objects.create(component = component,
+                                    name = x['name'] ,
+                                    max_marks =  x['max_marks'] ,
+                                    description=x.get('description'),
+                                    start_date=x.get('start_date'),  
+                                    end_date=x.get('end_date'),
+                                    is_submission=x.get('is_submission', False), 
+                                    is_active=x.get('is_active', True)  )
         message = "SubComponent created successfully"
         return response_handler(message= message , code = 200 , data = {})
     
