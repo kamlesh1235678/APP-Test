@@ -178,9 +178,12 @@ class ClassAttendanceAPIView(APIView):
         for student in student_serializer.data:
             student['is_persent'] = student_attendance.get(student['id'] , True)
         message = "class wise student list fetch successfully"
-        return response_handler(message = message , code = 200  , data = student_serializer.data)
+        data = {
+            "class_schedule": ClassScheduledListSerializer(class_schedule).data,
+            "students": student_serializer.data,}
+        return response_handler(message = message , code = 200  , data = data)
     
-    
+
     # @method_decorator(validate_attendance_time, name='dispatch')
     def post(self, request , class_id):
         class_schedule = get_object_or_404(ClassSchedule , id = class_id)
