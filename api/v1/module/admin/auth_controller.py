@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 from django.db.models import Q
 from django.core.mail import send_mail
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password , check_password
 from modules.users.models import *
 from rest_framework import status
 
@@ -138,3 +138,30 @@ class AuditLogAPIView(APIView):
         result_page = paginator.paginate_queryset(queryset, request)
         serializer = AuditLogSerializer(result_page, many=True)
         return response_handler(message="Logs listh fetched successfully" , code = 200 , data = serializer.data)
+    
+
+
+class ResetPasswordAPIView(APIView):
+    def post(self, request):
+        current_password = request.data.get('current_password', None)
+        new_password = request.data.get('new_password', None)
+        confirm_password = request.data.get('confirm_password', None)
+
+        # Ensure the current password and new password are provided
+        if not current_password or not new_password or not confirm_password:
+            return response_handler(message="Current password, new password, or confirm password is missing" , code=400 , data = {})
+            
+
+        # Ensure new password and confirm password match
+        if new_password != confirm_password:
+            return response_handler(message = "New password and confirm password do not match" , code=400 , data={})
+
+        # Check if the provided current password matches the one stored in the database
+        if not check_password(current_password, request.user.password):
+            return response_handler(message="Current password is incorrect" , code = 400 , data={})
+
+        # Update the user's password with the new one
+        request.user.password = make_password(new_password)
+        request.user.save()
+
+        return response_handler(message="Password reset successfully" , code = 200 , data={})

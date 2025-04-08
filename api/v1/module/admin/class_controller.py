@@ -32,13 +32,25 @@ class ClassScheduledPagination(PageNumberPagination):
         message = "Class Scheduled list fetch successfully"
         return Response({'message':message , 'code':200 , 'data':data , 'extra': {'count':total_items , 'total': total_page , 'page_size': self.page_size}})
 
+
+import django_filters
+
+class ClassFilter(django_filters.FilterSet):
+    s_date = django_filters.DateFilter(field_name='date', lookup_expr='gte')
+    e_date = django_filters.DateFilter(field_name='date', lookup_expr='lte')
+
+    class Meta:
+        model = ClassSchedule
+        fields = ['mapping__term', 'mapping', 's_date', 'e_date']
+
 class ClassScheduledModelViewSet(viewsets.ModelViewSet):
     queryset = ClassSchedule.objects.all().order_by('-id')
     serializer_class = ClassScheduledSerializer
     pagination_class = ClassScheduledPagination
     http_method_names = ['get' , 'post' , 'put' , 'delete']
     filter_backends = [SearchFilter , DjangoFilterBackend]
-    filterset_fields = ['date' , 'mapping__subject__name' , 'mapping__faculty__first_name']
+    filterset_class = ClassFilter
+    filterset_fields = ['date' , 'mapping' , "mapping__term"]
 
 
     def get_serializer_class(self):

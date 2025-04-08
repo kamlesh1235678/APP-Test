@@ -25,16 +25,9 @@ class EventsPagination(PageNumberPagination):
 
 class EventsModelViewSet(viewsets.ModelViewSet):
     today = localdate()
-    queryset = Events.objects.annotate(
-        is_today=Case(
-            When(date=today, then=Value(1)),  # Today’s events
-            When(date__gt=today, then=Value(2)),  # Future events
-            default=Value(3),  # Past events
-            output_field=IntegerField(),
-        )
-    ).order_by('is_today', 'date')
+    queryset = Events.objects.all()
     serializer_class = EventsSerializer
-    pagination_class = EventsPagination
+    # pagination_class = EventsPagination
     http_method_names = ['get' , 'post' , 'put' , 'delete']
     filter_backends = [SearchFilter , DjangoFilterBackend]
     filterset_fields = ['name']
@@ -44,8 +37,18 @@ class EventsModelViewSet(viewsets.ModelViewSet):
         try:
             return super().get_queryset()
         except:
-            message = "Events lsit fetch successfully"
-            return response_handler(message=message, code=400 , data= {})
+            message = "Events list fetch failed"
+            return []  # return empty queryset to avoid error
+
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            serializer = self.get_serializer(queryset, many=True)
+            message = "Events list fetched successfully"
+            return response_handler(message=message, code=200, data=serializer.data)
+        except Exception as e:
+            message = f"Error fetching events: {str(e)}"
+            return response_handler(message=message, code=400, data={})
         
     def create(self, request, *args, **kwargs):
         try:

@@ -35,6 +35,11 @@ class ComponentModelViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend , SearchFilter]
     filterset_fields = []
 
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return ComponentMixListSerializer
+        return ComponentSerializer
+
     def get_queryset(self):
         try:
             return super().get_queryset()
@@ -383,7 +388,7 @@ class ComponentMarksSubjectWiseSummary(APIView):
 class SubcomponentViewUpdateAPIView(APIView):
     def get(self, request , sub_component_id):
         sub_component = get_object_or_404(SubComponent , id = sub_component_id)
-        sub_component = SubComponentSerializer(sub_component)
+        sub_component = SubComponentMixListSerializer(sub_component)
         return response_handler(message="sub component data retrived successfully"  , code = 200 , data = sub_component.data)
     
     def put(self, request , sub_component_id):

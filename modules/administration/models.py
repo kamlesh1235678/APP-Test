@@ -2,7 +2,6 @@ from django.db import models
 from django.shortcuts import get_object_or_404
 from modules.users.models import Student
 from django.core.exceptions import ValidationError
-from django.utils import timezone
 
 # Create your models here.
 class Department(models.Model):
@@ -224,6 +223,8 @@ class Component(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     start_date = models.DateTimeField(null=True, blank=True)  
     end_date = models.DateTimeField(null=True, blank=True)
+    is_submission = models.BooleanField(default=False)
+
 
 
 class SubComponent(models.Model):
@@ -235,6 +236,7 @@ class SubComponent(models.Model):
     updated_at = models.DateTimeField(auto_now= True)
     start_date = models.DateTimeField(null=True, blank=True)  
     end_date = models.DateTimeField(null=True, blank=True)
+    is_submission = models.BooleanField(default=False)
     
 
 
@@ -386,11 +388,4 @@ class Events(models.Model):
     type =  models.CharField(max_length=999)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def save(self, *args, **kwargs):
-        # Ensure that 'date' is timezone-aware before saving
-        if self.date and timezone.is_naive(self.date):
-            self.date = timezone.make_aware(self.date)
-
-        super().save(*args, **kwargs)
 

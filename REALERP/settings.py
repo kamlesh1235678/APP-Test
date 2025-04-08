@@ -68,7 +68,8 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://erp.taxila.in",
-    "https://taxilarep-env-staging-desi-mochis-projects.vercel.app"
+    "https://testerp.taxila.in",
+    "http://testerp.taxila.in"
 ]
 
 CORS_ALLOW_CREDENTIALS = True

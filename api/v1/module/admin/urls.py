@@ -125,6 +125,7 @@ urlpatterns = [
   path('faculty-wise-class-filter/<int:faculty_id>', UpComeingFacultyClassAPIView.as_view(), name='faculty-wise-class-filter'),
   path('student-mapping-filter', StudentMappingFilter.as_view(), name='student-mapping-filter'),
   path('employee-details/<int:faculty_id>', EmployeeSummary.as_view(), name='employee-details'),
+  path('reset-password', ResetPasswordAPIView.as_view(), name='reset-password'),
 ]
 
                                                                                                                                                                                          
