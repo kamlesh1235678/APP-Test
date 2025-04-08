@@ -85,10 +85,12 @@ class ComponentMixListSerializer(serializers.ModelSerializer):
         return False  # Default to False if dates are missing
 
     def get_is_marks_add_status(self, obj):
-        current_time = now()
-        if obj.end_date:
-            return current_time > obj.end_date
-        return False
+        if obj.is_submission:
+            current_time = now()
+            if obj.end_date:
+                return current_time > obj.end_date
+            return False
+        return True
 
 
 
@@ -106,11 +108,13 @@ class SubComponentMixListSerializer(serializers.ModelSerializer):
         return False  # Default to False if dates are missing
 
     def get_is_marks_add_status(self, obj):
-        current_time = now()
-        if obj.end_date:
-            return current_time > obj.end_date
+        if obj.is_submission:
+            current_time = now()
+            if obj.end_date:
+                return current_time > obj.end_date
+            return False
         return False
-    
+        
 class DashBoardStudentDataSerializer(serializers.ModelSerializer):
     batch = BatchMixSerializer()
     course = CourseMixSerializer()
