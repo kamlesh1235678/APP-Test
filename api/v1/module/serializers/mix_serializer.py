@@ -113,7 +113,7 @@ class SubComponentMixListSerializer(serializers.ModelSerializer):
             if obj.start_date:
                 return current_time > obj.start_date
             return False
-        return False
+        return True
         
 class DashBoardStudentDataSerializer(serializers.ModelSerializer):
     batch = BatchMixSerializer()
