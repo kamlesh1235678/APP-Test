@@ -173,8 +173,8 @@ class ClassAttendanceAPIView(APIView):
         term =  class_schedule.mapping.term
         specialization= class_schedule.mapping.specialization.all()
         students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
-        student_serializer = StudentMixSerializer(instance = students , many = True)
-        student_attendance = {attendance.student.id : {{"is_persent": attendance.is_persent, "ce_marks": attendance.ce_marks}} for attendance in Attendance.objects.filter(class_schedule = class_id)}
+        student_serializer = StudentAttendanceSerializer(instance = students , many = True)
+        student_attendance = {attendance.student.id : {"is_persent": attendance.is_persent, "ce_marks": attendance.ce_marks} for attendance in Attendance.objects.filter(class_schedule = class_id)}
         for student in student_serializer.data:
             student_info = student_attendance.get(student['id'] , {})
             student['is_persent'] = student_info.get("is_persent", True)
