@@ -178,7 +178,7 @@ class StudentMappingFiterSerializer(serializers.ModelSerializer):
 
 
 
-class StudentMixSerializer(serializers.ModelSerializer):
+class StudentAttendanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ['id', 'first_name','middle_name', 'last_name' , 'enrollment_number' ]
