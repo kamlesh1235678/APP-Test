@@ -176,6 +176,7 @@ class ClassAttendanceAPIView(APIView):
         student_serializer = StudentAttendanceSerializer(instance = students , many = True)
         student_attendance = {attendance.student.id : {"is_persent": attendance.is_persent, "ce_marks": attendance.ce_marks} for attendance in Attendance.objects.filter(class_schedule = class_id)}
         for student in student_serializer.data:
+            
             student_info = student_attendance.get(student['id'] , {})
             student['is_persent'] = student_info.get("is_persent", True)
             student['ce_marks'] = student_info.get("ce_marks", 0)
@@ -195,13 +196,14 @@ class ClassAttendanceAPIView(APIView):
         specialization= class_schedule.mapping.specialization.all()
         students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
         student_class_info = request.data.get("student_class_info" ,[])
-        student_class_info_dict = {item['id'] : {item['is_persent'] , item['ce_marks']} for item in student_class_info}
+        student_class_info_dict = {item['id'] : {"is_persent": item['is_persent'] , "ce_marks": item['ce_marks']} for item in student_class_info}
         is_valid = set(student_class_info_dict.keys()).issubset(set(students.values_list('id' , flat=True)))
         if not is_valid:
             return response_handler(message="Some students do not belong to this class." , code = 400 , data= {})
         attendance_records = []
         for student in students:
-            student_info = student_class_info_dict.get(student['id'] , {})
+            student_info = student_class_info_dict.get(student.id, {})
+            # import pdb; pdb.set_trace()
             is_persent = student_info.get("is_persent")
             ce_marks = student_info.get("ce_marks")
             attendance , created = Attendance.objects.get_or_create(
