@@ -519,3 +519,7 @@ class StudentSubComponentAnswerDetails(APIView):
                 return response_handler(message="Answer created successfully", code=201, data=serializer.data)
             return response_handler(message=format_serializer_errors(serializer.errors)[0], code=400, data={})
 
+
+
+
+

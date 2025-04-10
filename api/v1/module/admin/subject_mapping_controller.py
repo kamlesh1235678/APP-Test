@@ -32,7 +32,7 @@ class SubjectMappingModelViewSet(viewsets.ModelViewSet):
     pagination_class = SubjectMappingPagination
     http_method_names = ['get' , 'post' , 'put' , 'delete']
     filter_backends = [SearchFilter , DjangoFilterBackend]
-    filterset_fields = ['subject__name' , "faculty__first_name"]
+    filterset_fields = ['subject__name' , 'term' , 'batch', "faculty__first_name"]
 
     def get_serializer_class(self):
         if self.request.method =='GET':

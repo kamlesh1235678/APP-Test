@@ -174,9 +174,11 @@ class ClassAttendanceAPIView(APIView):
         specialization= class_schedule.mapping.specialization.all()
         students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
         student_serializer = StudentMixSerializer(instance = students , many = True)
-        student_attendance = {attendance.student.id : attendance.is_persent for attendance in Attendance.objects.filter(class_schedule = class_id)}
+        student_attendance = {attendance.student.id : {{"is_persent": attendance.is_persent, "ce_marks": attendance.ce_marks}} for attendance in Attendance.objects.filter(class_schedule = class_id)}
         for student in student_serializer.data:
-            student['is_persent'] = student_attendance.get(student['id'] , True)
+            student_info = student_attendance.get(student['id'] , {})
+            student['is_persent'] = student_info.get("is_persent", True)
+            student['ce_marks'] = student_info.get("ce_marks", 0)
         message = "class wise student list fetch successfully"
         data = {
             "class_schedule": ClassScheduledListSerializer(class_schedule).data,
@@ -192,23 +194,28 @@ class ClassAttendanceAPIView(APIView):
         term =  class_schedule.mapping.term
         specialization= class_schedule.mapping.specialization.all()
         students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
-        persent_student_id = request.data.get("present_students" ,[])
-        is_valid = set(persent_student_id).issubset(set(students.values_list('id' , flat=True)))
+        student_class_info = request.data.get("student_class_info" ,[])
+        student_class_info_dict = {item['id'] : {item['is_persent'] , item['ce_marks']} for item in student_class_info}
+        is_valid = set(student_class_info_dict.keys()).issubset(set(students.values_list('id' , flat=True)))
         if not is_valid:
             return response_handler(message="Some students do not belong to this class." , code = 400 , data= {})
         attendance_records = []
         for student in students:
-            is_persent = student.id in persent_student_id
+            student_info = student_class_info_dict.get(student['id'] , {})
+            is_persent = student_info.get("is_persent")
+            ce_marks = student_info.get("ce_marks")
             attendance , created = Attendance.objects.get_or_create(
                 class_schedule = class_schedule , 
                 student = student,
-                defaults= {'is_persent' : is_persent})
+                defaults= {'is_persent' : is_persent , 'ce_marks':ce_marks})
             if not created:
                 attendance.is_persent = is_persent
+                attendance.ce_marks = ce_marks
                 attendance.save()
             attendance_records.append({
                 "student_id" : student.id , 
-                "is_persent" :is_persent
+                "is_persent" :is_persent , 
+                "ce_marks":ce_marks
             })
 
         class_schedule.is_complete = True
@@ -496,3 +503,6 @@ class UpComeingFacultyClassAPIView(APIView):
         
         class_schedules =  ClassScheduledListSerializer(class_schedules , many = True)
         return response_handler(message = "upcoming class fetched successfully"  ,code = 200  ,  data = class_schedules.data )
+    
+
+

@@ -202,6 +202,7 @@ class Attendance(models.Model):
     is_persent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now= True)
+    ce_marks = models.FloatField(default=0)
 
     class Meta:
         unique_together = ("class_schedule" , "student")
@@ -391,3 +392,34 @@ class Events(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.db.models import Sum
+
+@receiver(post_save, sender=Attendance)
+def update_component_marks(sender, instance, **kwargs):
+    try:
+        subject = instance.class_schedule.mapping
+        student = instance.student
+
+        # Get the "CE" component for this subject
+        ce_component = Component.objects.get(name="CE", subject_mapping=subject)
+
+
+        # Sum all ce_marks for this student and subject
+        total_ce_marks = Attendance.objects.filter(
+            class_schedule__mapping=subject,
+            student=student
+        ).aggregate(total=Sum("ce_marks"))["total"] or 0
+
+        # Update or create ComponentMarks
+        ComponentMarks.objects.update_or_create(
+            student=student,
+            component=ce_component,
+            defaults={"obtained_marks": total_ce_marks}
+        )
+    except Component.DoesNotExist:
+        pass
