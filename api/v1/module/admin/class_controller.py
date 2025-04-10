@@ -160,7 +160,7 @@ class BulkClassScheduledAPIView(APIView):
         
         return response_handler(
             message="Classes scheduled successfully",
-            code=status.HTTP_201_CREATED,
+            code=status.HTTP_200_OK,
             data={"created": created_schedules, "errors": errors}
         )
 
