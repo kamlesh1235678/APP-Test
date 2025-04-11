@@ -406,7 +406,7 @@ def update_component_marks(sender, instance, **kwargs):
         student = instance.student
 
         # Get the "CE" component for this subject
-        ce_component = Component.objects.get(name="CE", subject_mapping=subject)
+        ce_component = Component.objects.get(name="Performance Score", subject_mapping=subject)
 
 
         # Sum all ce_marks for this student and subject
