@@ -69,7 +69,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://erp.taxila.in",
     "https://testerp.taxila.in",
-    "http://testerp.taxila.in"
+    "http://testerp.taxila.in",
+    'http://192.168.0.190:3000'
 ]
 
 CORS_ALLOW_CREDENTIALS = True

@@ -20,10 +20,12 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
+        employee_roles_data = validated_data.pop('employee_role', [])
         user_serializer = UserSerializer(data = user_data)
         user_serializer.is_valid(raise_exception=True)
         user = user_serializer.save()
         employee = Employee.objects.create(user = user , **validated_data)
+        employee.employee_role.set(employee_roles_data)
         return employee
 
 
