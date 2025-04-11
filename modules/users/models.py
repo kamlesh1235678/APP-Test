@@ -163,7 +163,7 @@ class Employee(models.Model):
     # Employment Details
     institute_department = models.ForeignKey('administration.Department', on_delete=models.PROTECT, null=True , blank=True)
     designation = models.ForeignKey('administration.Designation', on_delete=models.PROTECT, null=True , blank=True)
-    employee_role = models.ForeignKey('administration.Role', on_delete=models.PROTECT)
+    employee_role = models.ManyToManyField('administration.Role' , related_name="employees_roles")
     # Address Details
     address = models.TextField( null=True , blank=True)
     city = models.CharField(max_length=50 ,  null=True , blank=True)

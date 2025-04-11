@@ -21,7 +21,7 @@ class LoginSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'student'):
             return obj.student.student_role.name
         elif hasattr(obj, 'employee'):
-            return obj.employee.employee_role.name
+            return [role.name for role in obj.employee.employee_role.all()]
         return None
     
     def get_user_id(self, obj):
@@ -37,7 +37,7 @@ class LoginSerializer(serializers.ModelSerializer):
         if hasattr(obj, 'student'):
             return obj.student.student_role.id
         elif hasattr(obj, 'employee'):
-            return obj.employee.employee_role.id
+            return [role.id for role in obj.employee.employee_role.all()]
         return None
     
     def get_employee_type(self, obj):

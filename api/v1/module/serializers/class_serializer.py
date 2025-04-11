@@ -22,16 +22,3 @@ class ClassScheduledListSerializer(serializers.ModelSerializer):
         return obj.date < current_time.date() or (obj.date == current_time.date() and obj.start_time <= current_time.time())
 
     
-# class ClassScheduledAttendanceSerializer(serializers.ModelSerializer):
-#     is_ready_for_attendance = serializers.SerializerMethodField()
-    
-#     class Meta:
-#         model = ClassSchedule
-#         fields = "__all__"
-
-#     def get_is_ready_for_attendance(self, obj):
-#         current_time = now()
-#         # import pdb; pdb.set_trace()
-#         return obj.date < current_time.date() or (obj.date == current_time.date() and obj.start_time <= current_time.time())
-
-    
