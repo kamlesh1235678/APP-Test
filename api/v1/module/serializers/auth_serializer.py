@@ -60,12 +60,12 @@ class LoginSerializer(serializers.ModelSerializer):
             role = obj.student.student_role
             role = role.role_permissions.all().first()
             permissions = list(role.permission.all().values_list('codename', flat=True))
-            return permissions
+            return []
         elif hasattr(obj, 'employee'):
             role = obj.employee.employee_role
             role = role.role_permissions.all().first()
             permissions = list(role.permission.all().values_list('codename', flat=True))
-            return permissions
+            return []
         return []
 
 
