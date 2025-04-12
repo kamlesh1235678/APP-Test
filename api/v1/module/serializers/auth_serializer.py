@@ -9,7 +9,7 @@ class LoginSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     employee_type = serializers.SerializerMethodField()
     user_id  = serializers.SerializerMethodField()
-    # permission_list = serializers.SerializerMethodField()
+    permission_list = serializers.SerializerMethodField()
     
 
     class Meta:
@@ -54,19 +54,19 @@ class LoginSerializer(serializers.ModelSerializer):
         elif hasattr(obj, 'employee'):
             return f"{obj.employee.first_name} {obj.employee.last_name}"
         return None
-    # def get_permission_list(self, obj):
-    #     """Get role ID dynamically from related Student or Employee"""
-    #     if hasattr(obj, 'student'):
-    #         role = obj.student.student_role
-    #         role = role.role_permissions.all().first()
-    #         permissions = list(role.permission.all().values_list('codename', flat=True))
-    #         return []
-    #     elif hasattr(obj, 'employee'):
-    #         role = obj.employee.employee_role
-    #         role = role.role_permissions.all().first()
-    #         permissions = list(role.permission.all().values_list('codename', flat=True))
-    #         return []
-    #     return []
+    def get_permission_list(self, obj):
+        """Get role ID dynamically from related Student or Employee"""
+        if hasattr(obj, 'student'):
+            role = obj.student.student_role
+            role = role.role_permissions.all().first()
+            permissions = list(role.permission.all().values_list('codename', flat=True))
+            return permissions
+        elif hasattr(obj, 'employee'):
+            role = obj.employee.employee_role.all()
+            permissions_qs = RolePermission.objects.filter(role__in=role).values_list('codename', flat=True).distinct()
+            permissions = list(permissions_qs)
+            return permissions
+        return []
 
 
     
