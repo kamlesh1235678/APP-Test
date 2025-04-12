@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from api.v1.module.serializers.student_serializer import UserSerializer
-from modules.users.models import User , AuditLog
+from modules.users.models import User , AuditLog  
+from django.contrib.auth.models import Permission
 from modules.privacy.models import RolePermission
 
 class LoginSerializer(serializers.ModelSerializer):
@@ -63,7 +64,7 @@ class LoginSerializer(serializers.ModelSerializer):
             return permissions
         elif hasattr(obj, 'employee'):
             role = obj.employee.employee_role.all()
-            permissions_qs = RolePermission.objects.filter(role__in=role).values_list('codename', flat=True).distinct()
+            permissions_qs =Permission.objects.filter(role_permissions__role__in=role).values_list('codename', flat=True).distinct()
             permissions = list(permissions_qs)
             return permissions
         return []
