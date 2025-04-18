@@ -379,6 +379,9 @@ class AttendanceSummaryFilter(APIView):
         # Generate attendance summary
         attendance_summary = []
         for subject_mapping in subject_mappings:
+            attended_classes  = Attendance.objects.filter(class_schedule__mapping =   subject_mapping , student = student.id , is_persent = True).count()
+            complete_classes = subject_mapping.classes_completed
+            attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
             subject_attendance = []
             days = (e_date - s_date).days + 1  # Calculate total days in the range
 
@@ -399,7 +402,8 @@ class AttendanceSummaryFilter(APIView):
 
             attendance_summary.append({
                 "subject_mapping": SubjectMappingListSerializer(subject_mapping).data,
-                "attendance": subject_attendance
+                "attendance": subject_attendance , 
+                "attended_percentage" : attended_percentage
             })
 
         return response_handler(message="Summary fetched successfully", code=200, data=attendance_summary)
