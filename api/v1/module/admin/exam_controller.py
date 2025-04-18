@@ -122,15 +122,13 @@ class ExamSubjectMappingListAPIView(APIView):
     def get(self, request):
         term_id = request.query_params.get("term_id")
         batch_id = request.query_params.get("batch_id")
-        course_ids = request.query_params.getlist("course_id")  # Supports multiple
 
-        if not all([term_id, batch_id, course_ids]):
-            return response_handler(message="term_id, batch_id, and course_id(s) are required" , code= 400 , data= {})
+        if not all([term_id, batch_id]):
+            return response_handler(message="term_id and batch_id are required" , code= 400 , data= {})
 
         subject_mappings = SubjectMapping.objects.filter(
             term_id=term_id,
             batch_id=batch_id,
-            course__id__in=course_ids,
         ).distinct()
         serializer = ExamSubjectMappingSerializer(subject_mappings, many=True)
         return response_handler(message = "subject list fetched successfully" , code= 200 , data=serializer.data)
