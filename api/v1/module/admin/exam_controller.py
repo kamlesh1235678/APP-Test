@@ -117,3 +117,107 @@ class ExamModelViewSet(viewsets.ModelViewSet):
         
 
 
+
+class ExamSubjectMappingListAPIView(APIView):
+    def get(self, request):
+        term_id = request.query_params.get("term_id")
+        batch_id = request.query_params.get("batch_id")
+        course_ids = request.query_params.getlist("course_id")  # Supports multiple
+
+        if not all([term_id, batch_id, course_ids]):
+            return response_handler(message="term_id, batch_id, and course_id(s) are required" , code= 400 , data= {})
+
+        subject_mappings = SubjectMapping.objects.filter(
+            term_id=term_id,
+            batch_id=batch_id,
+            course__id__in=course_ids,
+        ).distinct()
+        serializer = ExamSubjectMappingSerializer(subject_mappings, many=True)
+        return response_handler(message = "subject list fetched successfully" , code= 200 , data=serializer.data)
+    
+    def post(self, request):
+        exam_data = request.data.get("exam_data" , [])
+        for exam in exam_data:
+            try:
+                component = Component.objects.get(id=exam.get("component_id"))
+                exam_obj = Exam.objects.create(
+                    component=component,
+                    date=exam.get("date"),
+                    start_time=exam.get("start_time"),
+                    duration=exam.get("duration", 3)
+                )
+            except Component.DoesNotExist:
+                return response_handler(
+                    message=  f"Component with id {exam.get('component_id')} not found",
+                    code= 400,
+                    data =  {})
+        return response_handler(message="Exam Schedule successfully" , code = 200 , data = {})
+
+
+
+
+class HallTicketAnnouncePagination(PageNumberPagination):
+    page_size = 10 
+    def get_paginated_response(self, data):
+        total_items = self.page.paginator.count
+        if not total_items:
+            return Response({'message':'HallTicketAnnounce no found' , 'code':400 , 'data': {} , 'extra':{}})
+        if self.page_size:
+            total_page = math.ceil(total_items/self.page_size)
+        message = "HallTicketAnnounce list fetch successfully"
+        return Response({'message':message , 'code':200 , 'data':data , 'extra': {'count':total_items , 'total': total_page , 'page_size': self.page_size}})
+
+class HallTicketAnnounceModelViewSet(viewsets.ModelViewSet):
+    queryset = HallTicketAnnounce.objects.all().order_by('-id')
+    serializer_class = HallTicketAnnounceSerializer
+    pagination_class = HallTicketAnnouncePagination
+    http_method_names = ['get' , 'post' , 'put' , 'delete']
+
+
+    def get_queryset(self):
+        try:
+            return super().get_queryset()
+        except:
+            message = "HallTicketAnnounce lsit fetch successfully"
+            return response_handler(message=message, code=400 , data= {})
+        
+    def create(self, request, *args, **kwargs):
+        try:
+            response = super().create(request , *args , **kwargs)
+            message = "HallTicketAnnounce create successfully"
+            return response_handler(message=message , code= 200 , data = response.data)
+        except ValidationError as e:
+            return response_handler( message=format_serializer_errors(e.detail), code=400,data={})
+        except Exception as e:
+            if isinstance(e.args[0], dict):  
+                formatted_errors = format_serializer_errors(e.args[0])
+                return response_handler(message=formatted_errors[0], code=400, data={})
+            else:
+                return response_handler(message=str(e), code=400, data={})
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.serializer_class(instance , data = request.data , partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            message = "HallTicketAnnounce updated successfully"
+            return response_handler(message= message , code = 200 , data = serializer.data )
+        message = format_serializer_errors(serializer.errors)[0]
+        return response_handler(message=message , code= 400 , data= {})
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        message = "HallTicketAnnounce data retrived successfully"
+        return response_handler(message= message , code= 200 , data=serializer.data)
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            message = "HallTicketAnnounce delete successfully"
+            return response_handler(message= message , code = 200 , data= {})
+        except:
+            message = "HallTicketAnnounce no found"
+            return response_handler(message= message , code = 400 , data= {})
+        

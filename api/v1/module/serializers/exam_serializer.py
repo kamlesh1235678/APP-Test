@@ -24,3 +24,25 @@ class ExamCancelSerializer(serializers.ModelSerializer):
         fields = ['is_cancel']
 
 
+class ExamSubjectMappingSerializer(serializers.ModelSerializer):
+    subject = SubjectMixSerializer()
+    component = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SubjectMapping
+        fields = ['subject', 'component']
+
+    def get_component(self, obj):
+        component = Component.objects.filter(subject_mapping=obj, name="Final").first()
+        if component:
+            return {
+                "id": component.id,
+                "name": component.name,
+            }
+        return None
+    
+
+class HallTicketAnnounceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HallTicketAnnounce
+        fields = "__all__"

@@ -247,12 +247,12 @@ class Exam(models.Model):
     component = models.ForeignKey(Component , models.PROTECT , related_name="exam_subject")
     date = models.DateField()
     start_time = models.TimeField()
-    end_time = models.TimeField()
     is_cancel = models.BooleanField(default= False)
     is_reschedule = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now= True)
+    duration = models.FloatField(default=3)
 
     def __str__(self):
         return f"{self.component.subject_mapping}  - {self.date}"
@@ -423,3 +423,12 @@ def update_component_marks(sender, instance, **kwargs):
         )
     except Component.DoesNotExist:
         pass
+
+
+
+class HallTicketAnnounce(models.Model):
+    batch = models.ForeignKey(Batch , on_delete=models.PROTECT , related_name="holl_ticket")
+    term = models.ForeignKey(Terms , on_delete=models.PROTECT , related_name="holl_ticket")
+    is_active =  models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now= True)

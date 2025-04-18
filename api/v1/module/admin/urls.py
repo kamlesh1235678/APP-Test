@@ -58,6 +58,7 @@ router.register(r'student-leave-viewset' , StudentLeaveRequestModelViewSet)
 router.register(r'subject-syllabus-viewset' , SubjectMappingSyllabusModelViewSet)
 router.register(r'sub-component-answer-viewset' , SubComponentAnswersModelViewSet)
 router.register(r'events-viewset' , EventsModelViewSet)
+router.register(r'hall-ticket-viewset' , HallTicketAnnounceModelViewSet)
 
 
 def base_view(request):
@@ -130,6 +131,7 @@ urlpatterns = [
   path('admit-card', AdmitCardView.as_view(), name='admit-card'),
   path('hall-ticket/<int:student_id>/<int:term_id>', HallTicketWise.as_view(), name='hall-ticket'),
   path('class-subject-wise-filter/<int:subject_id>' , UpComeingSubjectMappingClassAPIView.as_view(), name = "class-subject-wise-filter"),
+  path('subject-exam-schedule' , ExamSubjectMappingListAPIView.as_view() , name = "exam-schedule-subject")
 ]
 
                                                                                                                                                                                          
