@@ -25,6 +25,7 @@ from api.v1.module.admin.internship_controller import *
 from api.v1.module.admin.noticeboard_controller import *
 from api.v1.module.admin.leave_controller import *
 from api.v1.module.admin.events_controller import *
+from api.v1.module.admin.admit_card_controller import *
 
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -126,6 +127,9 @@ urlpatterns = [
   path('student-mapping-filter', StudentMappingFilter.as_view(), name='student-mapping-filter'),
   path('employee-details/<int:faculty_id>', EmployeeSummary.as_view(), name='employee-details'),
   path('reset-password', ResetPasswordAPIView.as_view(), name='reset-password'),
+  path('admit-card', AdmitCardView.as_view(), name='admit-card'),
+  path('hall-ticket/<int:student_id>/<int:term_id>', HallTicketWise.as_view(), name='hall-ticket'),
+  path('class-subject-wise-filter/<int:subject_id>' , UpComeingSubjectMappingClassAPIView.as_view(), name = "class-subject-wise-filter"),
 ]
 
                                                                                                                                                                                          

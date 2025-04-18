@@ -282,6 +282,9 @@ class AttendanceSummary(APIView):
         # Generate attendance summary
         attendance_summary = []
         for subject_mapping in subject_mappings:
+            attended_classes  = Attendance.objects.filter(class_schedule__mapping =   subject_mapping , student = student.id , is_persent = True).count()
+            complete_classes = subject_mapping.classes_completed
+            attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
             subject_attendance = []
             for i in range(days):
                 current_date = today - timedelta(days=i)
@@ -295,12 +298,14 @@ class AttendanceSummary(APIView):
                 
                 subject_attendance.append({
                     "date": current_date.strftime("%Y-%m-%d"),
-                    "status": status
+                    "status": status 
+                    
                 })
             
             attendance_summary.append({
                 "subject_mapping": SubjectMappingListSerializer(subject_mapping).data,
-                "attendance": subject_attendance
+                "attendance": subject_attendance ,
+                "attended_percentage" : attended_percentage
             })
         
         return response_handler(message="Summary fetched successfully", code=200, data=attendance_summary)
@@ -478,6 +483,48 @@ class UpComeingFacultyClassAPIView(APIView):
         filters = Q()
         if mapping:
             filters &= Q(mapping__in=mapping)
+        if term:
+            filters &= Q(mapping__term=term)
+        class_schedules = class_schedules.filter(filters)
+        if s_date and e_date:
+            s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
+            e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
+            class_schedules = class_schedules.filter(
+            date__range=[s_date, e_date]
+            )
+        elif s_date:
+            s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
+            e_date = s_date
+            class_schedules = class_schedules.filter(
+            date__range=[s_date, e_date]
+            )  
+        elif e_date:
+            e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
+            s_date = e_date  
+            class_schedules = class_schedules.filter(
+            date__range=[s_date, e_date]
+            )
+        else:
+            class_schedules = class_schedules
+
+        
+        class_schedules =  ClassScheduledListSerializer(class_schedules , many = True)
+        return response_handler(message = "upcoming class fetched successfully"  ,code = 200  ,  data = class_schedules.data )
+    
+
+
+
+class UpComeingSubjectMappingClassAPIView(APIView):
+    def get(self, request, subject_id):
+        term = request.query_params.get('term')
+        s_date = request.query_params.get('s_date')
+        e_date = request.query_params.get('e_date')
+        subject_id = get_object_or_404(SubjectMapping , id = subject_id)
+        today = datetime.today().date()
+        class_schedules = ClassSchedule.objects.filter(
+            mapping = subject_id
+            ).order_by('-date')
+        filters = Q()
         if term:
             filters &= Q(mapping__term=term)
         class_schedules = class_schedules.filter(filters)
