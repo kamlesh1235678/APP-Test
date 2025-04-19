@@ -137,6 +137,7 @@ class ExamSubjectMappingListAPIView(APIView):
         exam_data = request.data.get("exam_data" , [])
         for exam in exam_data:
             try:
+                
                 component = Component.objects.get(id=exam.get("component_id"))
                 exam_obj = Exam.objects.create(
                     component=component,

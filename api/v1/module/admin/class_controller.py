@@ -344,31 +344,27 @@ class AttendanceSummaryFilter(APIView):
             return response_handler(message="this subject still not assign you" , code = 200  , data = {})
         # import pdb; pdb.set_trace()
         
-        # filters1 = Q()
-        # Determine date range
-        today = datetime.today().date()
-        if s_date and e_date:
+        # Date parsing
+        if s_date:
             s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
+        if e_date:
             e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
-        elif s_date:
-            s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
-            e_date = s_date  # If only start date is given, consider attendance for that date only
-        elif e_date:
-            e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
-            s_date = e_date  # If only end date is given, consider attendance for that date only
-        else:
-            e_date = today
-            s_date = today - timedelta(days=6)  # Default last 7 days
 
-        # filters1 &= Q(date__gte=s_date, date__lte=e_date)
+        date_filter = Q()
+        if s_date and e_date:
+            date_filter &= Q(date__range=[s_date, e_date])
+        elif s_date:
+            date_filter &= Q(date=s_date)
+        elif e_date:
+            date_filter &= Q(date=e_date)
+        # else: no date filtering applied if both s_date and e_date are missing
 
         # Get class schedules
         class_schedules = ClassSchedule.objects.filter(
             mapping__in=subject_mappings,
             is_cancel=False,
-            is_complete=True,
-            date__range=[s_date, e_date]
-        )
+            is_complete=True
+        ).filter(date_filter)
 
         # Get attendance records
         attendance_records = Attendance.objects.filter(
