@@ -340,17 +340,16 @@ class AttendanceSummaryFilter(APIView):
         if term:
             filters &= Q(term=term)
         subject_mappings = subject_mappings.filter(filters)
-
-        if not subject_mappings.exists():
-            return response_handler(message="This subject is not assigned to you", code=200, data={})
-
-        # Parse dates
+        if not subject_mappings.filter(filters).exists():
+            return response_handler(message="this subject still not assign you" , code = 200  , data = {})
+        # import pdb; pdb.set_trace()
+        
+        # Date parsing
         if s_date:
             s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
         if e_date:
             e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
 
-        # Get all relevant class schedules
         class_schedule_qs = ClassSchedule.objects.filter(
             mapping__in=subject_mappings,
             is_cancel=False,
@@ -375,45 +374,38 @@ class AttendanceSummaryFilter(APIView):
             s_date = class_schedule_qs.order_by("date").first().date
             e_date = class_schedule_qs.order_by("-date").first().date
 
+        # Generate attendance summary
         attendance_summary = []
-
         for subject_mapping in subject_mappings:
-            schedules_for_subject = class_schedule_qs.filter(mapping=subject_mapping)
-
-            # Get attendance per subject
-            attended_classes = attendance_records.filter(
-                class_schedule__mapping=subject_mapping,
-                is_present=True  # Ensure field is correct
-            ).count()
-
-            total_classes = schedules_for_subject.count()
-            attended_percentage = (attended_classes / total_classes) * 100 if total_classes > 0 else 0
-
+            attended_classes  = Attendance.objects.filter(class_schedule__mapping =   subject_mapping , student = student.id , is_persent = True).count()
+            complete_classes = subject_mapping.classes_completed
+            attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
             subject_attendance = []
-            if s_date and e_date:
-                days = (e_date - s_date).days + 1
-                for i in range(days):
-                    current_date = s_date + timedelta(days=i)
-                    schedule = schedules_for_subject.filter(date=current_date).first()
+            days = (e_date - s_date).days + 1  # Calculate total days in the range
 
-                    if schedule:
-                        attendance = attendance_records.filter(class_schedule=schedule).first()
-                        status = "Present" if attendance and attendance.is_present else "Absent"
-                    else:
-                        status = "Class Not Scheduled"
+            for i in range(days):
+                current_date = s_date + timedelta(days=i)
+                class_schedule = class_schedules.filter(date=current_date, mapping=subject_mapping).first()
 
-                    subject_attendance.append({
-                        "date": current_date.strftime("%Y-%m-%d"),
-                        "status": status
-                    })
+                if class_schedule:
+                    attendance = attendance_records.filter(class_schedule=class_schedule).first()
+                    status = "Present" if attendance and attendance.is_persent else "Absent"
+                else:
+                    status = "Class Not Scheduled"
+
+                subject_attendance.append({
+                    "date": current_date.strftime("%Y-%m-%d"),
+                    "status": status
+                })
 
             attendance_summary.append({
                 "subject_mapping": SubjectMappingListSerializer(subject_mapping).data,
-                "attendance": subject_attendance,
-                "attended_percentage": round(attended_percentage, 2)
+                "attendance": subject_attendance , 
+                "attended_percentage" : attended_percentage
             })
 
         return response_handler(message="Summary fetched successfully", code=200, data=attendance_summary)
+
 
 
 
