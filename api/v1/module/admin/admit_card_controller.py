@@ -60,17 +60,18 @@ class HallTicketWise(APIView):
         subject_data = []
         for subject in subject_mapping:
             exam = Exam.objects.filter(component__subject_mapping = subject).first()
-            subject_data.append({"subject_name": subject.subject.name ,
-                                 "exam_date": exam.date,
-                                 "start_time" : exam.start_time,
-                                 "end_time": exam.end_time , 
-                                 })
+            subject_data.append({
+                        "subject_name": subject.subject.name if subject.subject and subject.subject.name else None,
+                        "exam_date": exam.date if exam and exam.date else None,
+                        "start_time": exam.start_time if exam and exam.start_time else None,
+                        "duration": exam.duration if exam and exam.duration else None,
+                        })
         hall_ticket =  {"student_name": f"{student.first_name}{student.middle_name}{student.last_name}" ,
                         "student_batch" : student.batch.name,
                         "student_course": student.course.name,
                         "student_father_name": student.father_name , 
                         "student_enrollment_number": student.enrollment_number ,
-                        "student_specialization":student_mapping.values_list('specialization' , flat=True) , 
+                        "student_specialization":student_mapping.values_list('specialization__name' , flat=True) , 
                         "student_term": term.name}
         return response_handler(message="subject list fetyched successfully" , code = 200 , data=hall_ticket)
     
