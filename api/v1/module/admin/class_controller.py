@@ -350,7 +350,7 @@ class AttendanceSummaryFilter(APIView):
         if e_date:
             e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
 
-        class_schedule_qs = ClassSchedule.objects.filter(
+        class_schedules = ClassSchedule.objects.filter(
             mapping__in=subject_mappings,
             is_cancel=False,
             is_complete=True
@@ -358,21 +358,21 @@ class AttendanceSummaryFilter(APIView):
 
         # Apply date filters only if provided
         if s_date and e_date:
-            class_schedule_qs = class_schedule_qs.filter(date__range=[s_date, e_date])
+            class_schedules = class_schedules.filter(date__range=[s_date, e_date])
         elif s_date:
-            class_schedule_qs = class_schedule_qs.filter(date=s_date)
+            class_schedules = class_schedules.filter(date=s_date)
         elif e_date:
-            class_schedule_qs = class_schedule_qs.filter(date=e_date)
+            class_schedules = class_schedules.filter(date=e_date)
 
         attendance_records = Attendance.objects.filter(
             student=student,
-            class_schedule__in=class_schedule_qs
+            class_schedule__in=class_schedules
         )
 
         # If no date range provided, use full date range from schedules for summary loop
-        if not s_date and not e_date and class_schedule_qs.exists():
-            s_date = class_schedule_qs.order_by("date").first().date
-            e_date = class_schedule_qs.order_by("-date").first().date
+        if not s_date and not e_date and class_schedules.exists():
+            s_date = class_schedules.order_by("date").first().date
+            e_date = class_schedules.order_by("-date").first().date
 
         # Generate attendance summary
         attendance_summary = []
