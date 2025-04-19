@@ -54,3 +54,20 @@ class HallTicketAnnounceListSerializer(serializers.ModelSerializer):
     class Meta:
         model = HallTicketAnnounce
         fields = "__all__"
+
+
+class ExamListtSerializer(serializers.ModelSerializer):
+    subject_name = serializers.SerializerMethodField()
+    term_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Exam
+        fields = "__all__"
+
+    def get_subject_name(self, obj):
+        if obj:
+            return obj.component.subject_mapping.subject.name
+    
+    def get_term_name(self, obj):
+        if obj:
+            return obj.component.subject_mapping.term.name

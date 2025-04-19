@@ -34,6 +34,11 @@ class ExamModelViewSet(viewsets.ModelViewSet):
     filter_backends =[SearchFilter , DjangoFilterBackend]
     filterset_fields = []
 
+    def get_serializer_class(self):
+        if self.request.method =='GET':
+            return ExamListtSerializer
+        return ExamSerializer
+
 
     def get_queryset(self):
         try:
