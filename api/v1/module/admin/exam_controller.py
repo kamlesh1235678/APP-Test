@@ -258,6 +258,6 @@ class HallTicketAnnounceModelViewSet(viewsets.ModelViewSet):
 
 class BatchWiseHallTicketAnnounce(APIView):
     def get(self, request , batch):
-        announced =  HallTicketAnnounce.objects.filter(batch = batch , is_acttive = True)
+        announced =  HallTicketAnnounce.objects.filter(batch = batch , is_active = True)
         announced = HallTicketAnnounceListSerializer(announced , many = True)
         return response_handler(message="hall ticket announced successfully" , code0 =200 , data = announced.data)

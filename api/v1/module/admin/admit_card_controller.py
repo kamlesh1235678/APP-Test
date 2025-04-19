@@ -72,6 +72,7 @@ class HallTicketWise(APIView):
                         "student_father_name": student.father_name , 
                         "student_enrollment_number": student.enrollment_number ,
                         "student_specialization":student_mapping.values_list('specialization__name' , flat=True) , 
-                        "student_term": term.name}
+                        "student_term": term.name , 
+                        "subject_data": subject_data}
         return response_handler(message="subject list fetyched successfully" , code = 200 , data=hall_ticket)
     
