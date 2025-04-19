@@ -135,6 +135,7 @@ class ExamSubjectMappingListAPIView(APIView):
     
     def post(self, request):
         exam_data = request.data.get("exam_data", [])
+        # import pdb ; pdb.set_trace()
         errors = []
 
         for exam in exam_data:
@@ -142,6 +143,7 @@ class ExamSubjectMappingListAPIView(APIView):
             date = exam.get("date")
             start_time = exam.get("start_time")
             duration = exam.get("duration", 3)
+            
 
             if not component_id:
                 errors.append("Component ID is required.")
@@ -159,7 +161,7 @@ class ExamSubjectMappingListAPIView(APIView):
             if not date:
                 errors.append(f"Date is required for subject: {subject_name}")
                 continue
-
+            # import pdb ; pdb.set_trace()
             # Update if exam already exists for the component, else create new
             exam_obj, created = Exam.objects.update_or_create(
                 component=component,
