@@ -203,6 +203,10 @@ class HallTicketAnnounceModelViewSet(viewsets.ModelViewSet):
     pagination_class = HallTicketAnnouncePagination
     http_method_names = ['get' , 'post' , 'put' , 'delete']
 
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return HallTicketAnnounceListSerializer
+        return HallTicketAnnounceSerializer
 
     def get_queryset(self):
         try:
