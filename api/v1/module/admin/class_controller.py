@@ -340,70 +340,80 @@ class AttendanceSummaryFilter(APIView):
         if term:
             filters &= Q(term=term)
         subject_mappings = subject_mappings.filter(filters)
-        if not subject_mappings.filter(filters).exists():
-            return response_handler(message="this subject still not assign you" , code = 200  , data = {})
-        # import pdb; pdb.set_trace()
-        
-        # Date parsing
+
+        if not subject_mappings.exists():
+            return response_handler(message="This subject is not assigned to you", code=200, data={})
+
+        # Parse dates
         if s_date:
             s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
         if e_date:
             e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
 
-        date_filter = Q()
-        if s_date and e_date:
-            date_filter &= Q(date__range=[s_date, e_date])
-        elif s_date:
-            date_filter &= Q(date=s_date)
-        elif e_date:
-            date_filter &= Q(date=e_date)
-        # else: no date filtering applied if both s_date and e_date are missing
-
-        # Get class schedules
-        class_schedules = ClassSchedule.objects.filter(
+        # Get all relevant class schedules
+        class_schedule_qs = ClassSchedule.objects.filter(
             mapping__in=subject_mappings,
             is_cancel=False,
             is_complete=True
-        ).filter(date_filter)
-
-        # Get attendance records
-        attendance_records = Attendance.objects.filter(
-            student=student,
-            class_schedule__in=class_schedules
         )
 
-        # Generate attendance summary
+        # Apply date filters only if provided
+        if s_date and e_date:
+            class_schedule_qs = class_schedule_qs.filter(date__range=[s_date, e_date])
+        elif s_date:
+            class_schedule_qs = class_schedule_qs.filter(date=s_date)
+        elif e_date:
+            class_schedule_qs = class_schedule_qs.filter(date=e_date)
+
+        attendance_records = Attendance.objects.filter(
+            student=student,
+            class_schedule__in=class_schedule_qs
+        )
+
+        # If no date range provided, use full date range from schedules for summary loop
+        if not s_date and not e_date and class_schedule_qs.exists():
+            s_date = class_schedule_qs.order_by("date").first().date
+            e_date = class_schedule_qs.order_by("-date").first().date
+
         attendance_summary = []
+
         for subject_mapping in subject_mappings:
-            attended_classes  = Attendance.objects.filter(class_schedule__mapping =   subject_mapping , student = student.id , is_persent = True).count()
-            complete_classes = subject_mapping.classes_completed
-            attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
+            schedules_for_subject = class_schedule_qs.filter(mapping=subject_mapping)
+
+            # Get attendance per subject
+            attended_classes = attendance_records.filter(
+                class_schedule__mapping=subject_mapping,
+                is_present=True  # Ensure field is correct
+            ).count()
+
+            total_classes = schedules_for_subject.count()
+            attended_percentage = (attended_classes / total_classes) * 100 if total_classes > 0 else 0
+
             subject_attendance = []
-            days = (e_date - s_date).days + 1  # Calculate total days in the range
+            if s_date and e_date:
+                days = (e_date - s_date).days + 1
+                for i in range(days):
+                    current_date = s_date + timedelta(days=i)
+                    schedule = schedules_for_subject.filter(date=current_date).first()
 
-            for i in range(days):
-                current_date = s_date + timedelta(days=i)
-                class_schedule = class_schedules.filter(date=current_date, mapping=subject_mapping).first()
+                    if schedule:
+                        attendance = attendance_records.filter(class_schedule=schedule).first()
+                        status = "Present" if attendance and attendance.is_present else "Absent"
+                    else:
+                        status = "Class Not Scheduled"
 
-                if class_schedule:
-                    attendance = attendance_records.filter(class_schedule=class_schedule).first()
-                    status = "Present" if attendance and attendance.is_persent else "Absent"
-                else:
-                    status = "Class Not Scheduled"
-
-                subject_attendance.append({
-                    "date": current_date.strftime("%Y-%m-%d"),
-                    "status": status
-                })
+                    subject_attendance.append({
+                        "date": current_date.strftime("%Y-%m-%d"),
+                        "status": status
+                    })
 
             attendance_summary.append({
                 "subject_mapping": SubjectMappingListSerializer(subject_mapping).data,
-                "attendance": subject_attendance , 
-                "attended_percentage" : attended_percentage
+                "attendance": subject_attendance,
+                "attended_percentage": round(attended_percentage, 2)
             })
 
         return response_handler(message="Summary fetched successfully", code=200, data=attendance_summary)
-
 
 
 

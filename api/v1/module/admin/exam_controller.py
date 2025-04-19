@@ -134,23 +134,47 @@ class ExamSubjectMappingListAPIView(APIView):
         return response_handler(message = "subject list fetched successfully" , code= 200 , data=serializer.data)
     
     def post(self, request):
-        exam_data = request.data.get("exam_data" , [])
-        for exam in exam_data:
-            try:
+        exam_data = request.data.get("exam_data", [])
+        errors = []
 
-                component = Component.objects.get(id=exam.get("component_id"))
-                exam_obj = Exam.objects.create(
-                    component=component,
-                    date=exam.get("date"),
-                    start_time=exam.get("start_time"),
-                    duration=exam.get("duration", 3)
-                )
+        for exam in exam_data:
+            component_id = exam.get("component_id")
+            date = exam.get("date")
+            start_time = exam.get("start_time")
+            duration = exam.get("duration", 3)
+
+            if not component_id:
+                errors.append("Component ID is required.")
+                continue
+
+            try:
+                component = Component.objects.get(id=component_id)
             except Component.DoesNotExist:
-                return response_handler(
-                    message=  f"Component with id {exam.get('component_id')} not found",
-                    code= 400,
-                    data =  {})
-        return response_handler(message="Exam Schedule successfully" , code = 200 , data = {})
+                errors.append(f"Component with id {component_id} not found.")
+                continue
+
+            # Subject Name for Error Message
+            subject_name = getattr(component, "name", f"ID {component_id}")
+
+            if not date:
+                errors.append(f"Date is required for subject: {subject_name}")
+                continue
+
+            # Update if exam already exists for the component, else create new
+            exam_obj, created = Exam.objects.update_or_create(
+                component=component,
+                defaults={
+                    "date": date,
+                    "start_time": start_time,
+                    "duration": duration
+                }
+            )
+
+        if errors:
+            return response_handler(message=errors, code=400, data={})
+
+        return response_handler(message="Exam Schedule processed successfully", code=200, data={})
+
 
 
 
