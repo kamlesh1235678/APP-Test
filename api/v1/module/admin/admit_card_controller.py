@@ -54,6 +54,7 @@ class HallTicketWise(APIView):
         student_mapping = StudentMapping.objects.filter(student = student)
         subject_mapping = SubjectMapping.objects.filter(
             batch = student.batch,
+            
             course = student.course,
             term__in = student_mapping.values_list('term' , flat=True),
             specialization__in = student_mapping.values_list('specialization' , flat=True))

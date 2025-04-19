@@ -302,3 +302,11 @@ class EmployeeSummary(APIView):
         data['subject_assign'] = subject_assign.data
 
         return response_handler(message="employee data fetched successfully" , code = 200 , data  =data)
+    
+
+
+class StudentBatchwise(APIView):
+    def get(self, request , batch):
+        student = Student.objects.filter(batch = batch)
+        student = StudentMixSerializer(student ,many = True)
+        return response_handler(message="student list fetched successfully" , code = 200 , data = student.data)
