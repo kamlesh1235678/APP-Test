@@ -137,7 +137,7 @@ class ExamSubjectMappingListAPIView(APIView):
         exam_data = request.data.get("exam_data" , [])
         for exam in exam_data:
             try:
-                
+
                 component = Component.objects.get(id=exam.get("component_id"))
                 exam_obj = Exam.objects.create(
                     component=component,
@@ -220,3 +220,9 @@ class HallTicketAnnounceModelViewSet(viewsets.ModelViewSet):
             message = "HallTicketAnnounce no found"
             return response_handler(message= message , code = 400 , data= {})
         
+
+class BatchWiseHallTicketAnnounce(APIView):
+    def get(self, request , batch):
+        announced =  HallTicketAnnounce.objects.filter(batch = batch , is_acttive = True)
+        announced = HallTicketAnnounceListSerializer(announced , many = True)
+        return response_handler(message="hall ticket announced successfully" , code0 =200 , data = announced.data)

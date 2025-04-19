@@ -131,7 +131,8 @@ urlpatterns = [
   path('admit-card', AdmitCardView.as_view(), name='admit-card'),
   path('hall-ticket/<int:student_id>/<int:term_id>', HallTicketWise.as_view(), name='hall-ticket'),
   path('class-subject-wise-filter/<int:subject_id>' , UpComeingSubjectMappingClassAPIView.as_view(), name = "class-subject-wise-filter"),
-  path('subject-exam-schedule-bulk' , ExamSubjectMappingListAPIView.as_view() , name = "subject-exam-schedule-bulk")
+  path('subject-exam-schedule-bulk' , ExamSubjectMappingListAPIView.as_view() , name = "subject-exam-schedule-bulk"),
+  path('batch-wise-hall-ticket-announced/<int:batch>' , BatchWiseHallTicketAnnounce.as_view() , name  = "batch-wise-hall-ticket-announced")
 ]
 
                                                                                                                                                                                          

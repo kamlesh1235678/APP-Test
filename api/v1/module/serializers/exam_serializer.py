@@ -46,3 +46,11 @@ class HallTicketAnnounceSerializer(serializers.ModelSerializer):
     class Meta:
         model = HallTicketAnnounce
         fields = "__all__"
+
+
+class HallTicketAnnounceListSerializer(serializers.ModelSerializer):
+    batch =  BatchMixSerializer()
+    term  = TermsMixSerializer()
+    class Meta:
+        model = HallTicketAnnounce
+        fields = "__all__"
