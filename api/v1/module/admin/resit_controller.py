@@ -137,7 +137,6 @@ class ResetStudentComponentMarksUpdateAPI(APIView):
 class StudentResetSubjectWiseGPAAPIView(APIView):
     def get(self, request , student_id, batch_id, term_id, course_id):
         reset_subject = SubjectMapping.objects.filter(resets__batch_id = batch_id , resets__course_id = course_id , resets__term_id = term_id , resets__student_id = student_id).distinct()
-        
         subject_data = get_subject_data(student_id ,reset_subject)
         total_credit = sum(item['credit'] for item in subject_data.values())
         total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())

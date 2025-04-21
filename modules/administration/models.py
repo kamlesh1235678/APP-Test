@@ -92,6 +92,7 @@ class SubjectMapping(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now= True)
     type = models.CharField(max_length=150 , choices=[("main" , "main") , ("resit-1" , "resit-1") , ("resit-2", "resit-2")])
+    is_active = models.BooleanField(default=False)
 
     @property
     def classes_pending(self):
