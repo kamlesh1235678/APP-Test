@@ -128,8 +128,9 @@ class PromoteStudentInTermAPIView(APIView):
 
         for last_term in last_terms_data:
             last_term = get_object_or_404(StudentMapping , id = last_term)
+            term = get_object_or_404(Terms , id = up_coming_term)
             new_mapping , created= StudentMapping.objects.get_or_create(
-                term=up_coming_term,
+                term=term,
                 batch = last_term.batch,
                 course = last_term.course,
                 specialization=last_term.specialization
