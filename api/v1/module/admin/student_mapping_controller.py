@@ -141,12 +141,15 @@ class StudentMappingFilter(APIView):
     def get(self, request):
         course = request.query_params.get('course')
         batch = request.query_params.get('batch')
+        term = request.query_params.get('term')
         filters = Q()
         if course:
             filters &= Q(course = course)
         if batch:
             filters &= Q(batch= batch)
+        if term:
+            filters &= Q(term= term)
         student_mapping =  StudentMapping.objects.filter(filters).order_by('-id')
         student_mapping =  StudentMappingFiterSerializer(student_mapping , many = True)
-        return response_handler(message='filtered subject mapping list fetched successfully' , code= 200 , data=student_mapping.data)
+        return response_handler(message='filtered student mapping list fetched successfully' , code= 200 , data=student_mapping.data)
 
