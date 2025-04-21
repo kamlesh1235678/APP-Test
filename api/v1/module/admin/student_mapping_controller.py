@@ -128,13 +128,14 @@ class PromoteStudentInTermAPIView(APIView):
 
         for last_term in last_terms_data:
             last_term = get_object_or_404(StudentMapping , id = last_term)
-            new_mapping= StudentMapping.objects.create(
+            new_mapping , created= StudentMapping.objects.get_or_create(
                 term=up_coming_term,
                 batch = last_term.batch,
                 course = last_term.course,
                 specialization=last_term.specialization
             )
             new_mapping.student.set(last_term.student.all())
+            new_mapping.save()
         return response_handler(message = "Student promoted successfully" ,code = 200, data={} )
     
 
