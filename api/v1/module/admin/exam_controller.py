@@ -270,3 +270,19 @@ class BatchWiseHallTicketAnnounce(APIView):
         announced =  HallTicketAnnounce.objects.filter(batch = batch , is_active = True)
         announced = HallTicketAnnounceListSerializer(announced , many = True)
         return response_handler(message="hall ticket announced successfully" , code =200 , data = announced.data)
+    
+
+class StudentWiseExamList(APIView):
+    def get(self, request, student_id):
+        student = get_object_or_404(Student, id=student_id)
+        student_mapping = StudentMapping.objects.filter(student=student)
+        subject_mappings = SubjectMapping.objects.filter(
+            batch=student.batch,
+            course=student.course,
+            term__in=student_mapping.values_list('term', flat=True),
+            specialization__in=student_mapping.values_list('specialization', flat=True)
+        )
+        components = Component.objects.filter(subject_mapping__in=subject_mappings)
+        exams = Exam.objects.filter(component__in=components).order_by('date')
+        exam_data = ExamListtSerializer(exams, many=True).data
+        return response_handler(message="Exam list fetched successfully",code=200, data=exam_data)
