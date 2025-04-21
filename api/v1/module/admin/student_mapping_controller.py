@@ -121,16 +121,17 @@ class StudentSpecializationAPIView(APIView):
 class PromoteStudentInTermAPIView(APIView):
     def post(self, request):
         last_terms_data = request.data.get("last_terms_data", [])
-        term_id = request.data.get("term")
+        up_coming_term = request.data.get("term")
 
-        if not last_terms_data or not term_id:
+        if not last_terms_data or not up_coming_term :
             return response_handler(message = "Invalid data provided" ,code = 400, data={} )
 
         for last_term in last_terms_data:
             last_term = get_object_or_404(StudentMapping , id = last_term)
-            term = get_object_or_404(Terms , id= term_id)
             new_mapping= StudentMapping.objects.create(
-                term=term_id,
+                term=up_coming_term,
+                batch = last_term.batch,
+                course = last_term.course,
                 specialization=last_term.specialization
             )
             new_mapping.student.set(last_term.student.all())
