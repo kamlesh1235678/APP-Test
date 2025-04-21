@@ -6,14 +6,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from api.v1.module.serializers.admit_card_serializer import AdmitCardStudentSerializer
 
-class AdmitCardView(APIView):
-    permission_classes = [AllowAny]
+class IDCardView(APIView):
     def get(self, request):
-        term_id = request.query_params.get("term_id")
         student_id = request.query_params.get("student_id")
 
-        if not term_id:
-            return response_handler(message="term_id is required", code=400, data={})
         if not student_id:
             return response_handler(message="student_id is required", code=400, data={})
 
@@ -21,29 +17,15 @@ class AdmitCardView(APIView):
         batch = student.batch
         course = student.course
 
-        # Filter all mappings where this student is part of the ManyToMany and term matches
-        mappings = StudentMapping.objects.filter(
-            term_id=term_id,
-            student=student
-        )
-
-        if not mappings.exists():
-            return response_handler(message="No mapping found for this student and term", code=404, data={})
-
-        # Get all specialization names from matching mappings
-        specialization_names = [mapping.specialization.name for mapping in mappings]
-
         data = {
             "student_enrollment_number": student.enrollment_number,
             "student_aicte_permanent_id": student.aicte_permanent_id,
             "student_name": f"{student.first_name}{student.middle_name}{student.last_name}",
             "batch": batch.name if batch else None,
             "course": course.name if course else None,
-            "term_id": get_object_or_404(Terms , id = term_id).name,
-            "specializations": specialization_names,
         }
 
-        return response_handler(message="Admit card data fetched successfully", code=200, data=data)
+        return response_handler(message="Id Card fetched successfully", code=200, data=data)
 
 
 
