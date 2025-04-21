@@ -13,7 +13,16 @@ from django.shortcuts import get_object_or_404
 from api.v1.module.serializers.student_serializer import *
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError , NotFound
+import django_filters
 
+class ExamFilter(django_filters.FilterSet):
+    batch = django_filters.NumberFilter(field_name='component__subject_mapping__batch')
+    subject_name = django_filters.CharFilter(field_name='component__subject_mapping__subject__name', lookup_expr='icontains')
+    term = django_filters.NumberFilter(field_name='component__subject_mapping__term')
+
+    class Meta:
+        model = Exam
+        fields = ['batch', 'subject_name', 'term']
 
 class ExamPagination(PageNumberPagination):
     page_size = 10
@@ -32,7 +41,7 @@ class ExamModelViewSet(viewsets.ModelViewSet):
     pagination_class = ExamPagination
     http_method_names = ['get' , 'post' , 'put' , 'delete']
     filter_backends =[SearchFilter , DjangoFilterBackend]
-    filterset_fields = []
+    filterset_class = ExamFilter
 
     def get_serializer_class(self):
         if self.request.method =='GET':
