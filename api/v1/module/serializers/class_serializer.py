@@ -19,6 +19,6 @@ class ClassScheduledListSerializer(serializers.ModelSerializer):
     def get_is_ready_for_attendance(self, obj):
         current_time = now()
         # import pdb; pdb.set_trace()
-        return obj.date < current_time.date() or (obj.date == current_time.date() and obj.start_time <= current_time.time())
+        return obj.date <= current_time.date() or (obj.date == current_time.date() and obj.start_time <= current_time.time())
 
     

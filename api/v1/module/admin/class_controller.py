@@ -262,7 +262,8 @@ class AttendanceSummary(APIView):
             batch=student.batch,
             course=student.course,
             term__in=student_mappings.values_list("term", flat=True),
-            specialization__in=student_mappings.values_list("specialization", flat=True)
+            specialization__in=student_mappings.values_list("specialization", flat=True),
+            is_active = True # there is_active true for current term subject show 
         )
         
         # Step 2: Get class schedules for the subjects in the last 'days'
@@ -333,6 +334,9 @@ class AttendanceSummaryFilter(APIView):
             term__in=student_mappings.values_list("term", flat=True),
             specialization__in=student_mappings.values_list("specialization", flat=True)
         )
+        
+        if not term:
+            subject_mappings = subject_mappings.filter(is_active = True)  # there is active for current subject
 
         filters = Q()
         if mapping:
@@ -471,46 +475,44 @@ class UpComeingStudentClassAPIView(APIView):
     
 
 
-class UpComeingFacultyClassAPIView(APIView):
+class UpComingFacultyClassAPIView(APIView):
     def get(self, request, faculty_id):
-        mapping = request.query_params.get('mapping')
+        mapping_ids = request.query_params.getlist('mapping')  # Use getlist for multiple values
         term = request.query_params.get('term')
         s_date = request.query_params.get('s_date')
         e_date = request.query_params.get('e_date')
-        faculty_id = get_object_or_404(Employee , id = faculty_id)
-        today = datetime.today().date()
-        class_schedules = ClassSchedule.objects.filter(
-            mapping__faculty = faculty_id
-            ).order_by('-date')
+
+        faculty = get_object_or_404(Employee, id=faculty_id)
+        class_schedules = ClassSchedule.objects.filter(mapping__faculty=faculty)
+        if not term:
+            class_schedules = class_schedules.filter(mapping__is_active=True)  # there is active for current subject
         filters = Q()
-        if mapping:
-            filters &= Q(mapping__in=mapping)
+        if mapping_ids:
+            filters &= Q(mapping__in=mapping_ids)
         if term:
             filters &= Q(mapping__term=term)
+
         class_schedules = class_schedules.filter(filters)
+
+        # Date filter
         if s_date and e_date:
             s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
             e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
-            class_schedules = class_schedules.filter(
-            date__range=[s_date, e_date]
-            )
         elif s_date:
             s_date = datetime.strptime(s_date, "%Y-%m-%d").date()
             e_date = s_date
-            class_schedules = class_schedules.filter(
-            date__range=[s_date, e_date]
-            )  
         elif e_date:
             e_date = datetime.strptime(e_date, "%Y-%m-%d").date()
-            s_date = e_date  
-            class_schedules = class_schedules.filter(
-            date__range=[s_date, e_date]
-            )
+            s_date = e_date
         else:
-            class_schedules = class_schedules
+            s_date = e_date = None
 
-        
-        class_schedules =  ClassScheduledListSerializer(class_schedules , many = True)
+        if s_date or e_date:
+            class_schedules = class_schedules.filter(date__range=[s_date, e_date])
+
+        # Order and serialize
+        class_schedules = class_schedules.order_by('-date')
+        class_schedules = ClassScheduledListSerializer(class_schedules, many=True)
         return response_handler(message = "upcoming class fetched successfully"  ,code = 200  ,  data = class_schedules.data )
     
 
