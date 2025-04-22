@@ -135,6 +135,7 @@ urlpatterns = [
   path('batch-wise-hall-ticket-announced/<int:batch>' , BatchWiseHallTicketAnnounce.as_view() , name  = "batch-wise-hall-ticket-announced"),
   path('batch-wise-student/<int:batch>' , StudentBatchwise.as_view() , name="batch-wise-student"),
   path('student-wise-exam-list/<int:student_id>' , StudentWiseExamList.as_view() , name="student-wise-exam-list"),
+  path('subject-mapping-status' , SubjectMappingStatusAPIview.as_view() , name="subject-mapping-status"),
 ]
 
                                                                                                                                                                                          

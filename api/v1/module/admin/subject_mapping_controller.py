@@ -12,7 +12,14 @@ from rest_framework.exceptions import ValidationError , NotFound
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum
 from modules.users.models import Student
+from django_filters import rest_framework as filters
 
+class MyFilterSet(filters.FilterSet):
+    course = filters.BaseInFilter(field_name='course', lookup_expr='in')
+
+    class Meta:
+        model = SubjectMapping
+        fields = ['subject__name', 'term', 'batch', 'faculty__first_name', 'course']
 
 
 class SubjectMappingPagination(PageNumberPagination):
@@ -32,7 +39,7 @@ class SubjectMappingModelViewSet(viewsets.ModelViewSet):
     pagination_class = SubjectMappingPagination
     http_method_names = ['get' , 'post' , 'put' , 'delete']
     filter_backends = [SearchFilter , DjangoFilterBackend]
-    filterset_fields = ['subject__name' , 'term' , 'batch', "faculty__first_name"]
+    filterset_class = MyFilterSet
 
     def get_serializer_class(self):
         if self.request.method =='GET':
@@ -369,3 +376,12 @@ class SubjectMappingSyllabusAPI(APIView):
             return response_handler(message= "syllabus data updated successfully" , code = 200 , data= serializer.data)
         except SubjectMapping.DoesNotExist:
             return response_handler(message= "Invalid subject mapping id" , code = 400 , data= {})
+        
+
+
+class SubjectMappingStatusAPIview(APIView):
+    def post(self, request):
+        subject_mapping_ids = request.data.get("subject_mapping_ids" , []) # [{id , status} , {id , status}]
+        for subject_mapping in subject_mapping_ids:
+            SubjectMapping.objects.filter(pk = subject_mapping[0]).update(is_active = subject_mapping[1])
+        return response_handler(message="Status Update successfully" , code = 200 , data={})

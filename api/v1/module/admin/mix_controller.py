@@ -163,7 +163,7 @@ class FAcultyFilterAPIView(APIView):
         # import pdb; pdb.set_trace()
         filters = Q()
         if faculty:
-            filters &= Q(faculty_id=faculty)
+            filters &= Q(faculty_id=faculty , is_active =True) # there is active for current subject
         # if current_terms:
         #     filters &= Q(term__in=current_terms)
         
@@ -217,7 +217,7 @@ class MembershipFilterAPIView(APIView):
 class ScheduleClassFacultyWise(APIView):
     def get(self, request , faculty_id):
         today = datetime.today().date()
-        schedule_class = ClassSchedule.objects.filter(mapping__faculty = faculty_id , is_complete = False , date__gte = today).order_by('-id')
+        schedule_class = ClassSchedule.objects.filter(mapping__faculty = faculty_id , is_complete = False , date__gte = today , mapping__is_active = True).order_by('-id') # there is active for current subject
         schedule_class= ClassScheduledListSerializer(schedule_class , many = True)
         return response_handler(message="Scheduled class fetched successfully" , code = 200   ,  data=schedule_class.data)
     
