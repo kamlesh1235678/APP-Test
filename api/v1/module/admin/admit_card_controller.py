@@ -29,33 +29,110 @@ class IDCardView(APIView):
 
 
 
+# class HallTicketWise(APIView):
+#     def get(self, request , student_id , term_id):
+#         student = get_object_or_404(Student , id = student_id)
+#         term =  get_object_or_404(Terms , id = term_id)
+#         student_mapping = StudentMapping.objects.filter(student = student)
+#         subject_mapping = SubjectMapping.objects.filter(
+#             batch = student.batch,
+            
+#             course = student.course,
+#             term__in = student_mapping.values_list('term' , flat=True),
+#             specialization__in = student_mapping.values_list('specialization' , flat=True))
+#         subject_data = []
+#         for subject in subject_mapping:
+#             exam = Exam.objects.filter(component__subject_mapping = subject).first()
+#             subject_data.append({
+#                         "subject_name": subject.subject.name if subject.subject and subject.subject.name else None,
+#                         "exam_date": exam.date if exam and exam.date else None,
+#                         "start_time": exam.start_time if exam and exam.start_time else None,
+#                         "duration": exam.duration if exam and exam.duration else None,
+#                         })
+#         hall_ticket =  {"student_name": f"{student.first_name}{student.middle_name}{student.last_name}" ,
+#                         "student_batch" : student.batch.name,
+#                         "student_course": student.course.name,
+#                         "student_father_name": student.father_name , 
+#                         "student_enrollment_number": student.enrollment_number ,
+#                         "student_specialization":student_mapping.values_list('specialization__name' , flat=True) , 
+#                         "student_term": term.name , 
+#                         "subject_data": subject_data}
+#         return response_handler(message="subject list fetyched successfully" , code = 200 , data=hall_ticket)
+    
+
+
 class HallTicketWise(APIView):
-    def get(self, request , student_id , term_id):
+    def get(self, request , student_id , term_id , type):
         student = get_object_or_404(Student , id = student_id)
         term =  get_object_or_404(Terms , id = term_id)
-        student_mapping = StudentMapping.objects.filter(student = student)
-        subject_mapping = SubjectMapping.objects.filter(
-            batch = student.batch,
-            
-            course = student.course,
-            term__in = student_mapping.values_list('term' , flat=True),
-            specialization__in = student_mapping.values_list('specialization' , flat=True))
-        subject_data = []
-        for subject in subject_mapping:
-            exam = Exam.objects.filter(component__subject_mapping = subject).first()
-            subject_data.append({
-                        "subject_name": subject.subject.name if subject.subject and subject.subject.name else None,
-                        "exam_date": exam.date if exam and exam.date else None,
-                        "start_time": exam.start_time if exam and exam.start_time else None,
-                        "duration": exam.duration if exam and exam.duration else None,
-                        })
-        hall_ticket =  {"student_name": f"{student.first_name}{student.middle_name}{student.last_name}" ,
-                        "student_batch" : student.batch.name,
-                        "student_course": student.course.name,
-                        "student_father_name": student.father_name , 
-                        "student_enrollment_number": student.enrollment_number ,
-                        "student_specialization":student_mapping.values_list('specialization__name' , flat=True) , 
-                        "student_term": term.name , 
-                        "subject_data": subject_data}
-        return response_handler(message="subject list fetyched successfully" , code = 200 , data=hall_ticket)
-    
+        if type =="main":
+            student_mapping = StudentMapping.objects.filter(student = student)
+            subject_mapping = SubjectMapping.objects.filter(
+                batch = student.batch,
+                course = student.course,
+                term = term.id,
+                type = type,
+                specialization__in = student_mapping.values_list('specialization' , flat=True))
+            subject_data = []
+            for subject in subject_mapping:
+                exam = Exam.objects.filter(component__subject_mapping = subject).first()
+                subject_data.append({
+                            "subject_name": subject.subject.name if subject.subject and subject.subject.name else None,
+                            "exam_date": exam.date if exam and exam.date else None,
+                            "start_time": exam.start_time if exam and exam.start_time else None,
+                            "duration": exam.duration if exam and exam.duration else None,
+                            })
+            hall_ticket =  {"student_name": f"{student.first_name}{student.middle_name}{student.last_name}" ,
+                            "student_batch" : student.batch.name,
+                            "student_course": student.course.name,
+                            "student_father_name": student.father_name , 
+                            "student_enrollment_number": student.enrollment_number ,
+                            "student_specialization":student_mapping.values_list('specialization__name' , flat=True) , 
+                            "student_term": term.name , 
+                            "subject_data": subject_data}
+            return response_handler(message="subject list fetyched successfully" , code = 200 , data=hall_ticket)
+        if type =="resit-1":
+            student_requested_subject = ResetExamRequest.objects.filter(student = student , term= term.id  , batch = student.batch.id , course = student.course.id)
+            subject_mapping = SubjectMapping.objects.filter(id__in=student_requested_subject.values_list('subjects', flat=True))
+
+            subject_data = []
+            for subject in subject_mapping:
+                exam = Exam.objects.filter(component__subject_mapping = subject).first()
+                subject_data.append({
+                            "subject_name": subject.subject.name if subject.subject and subject.subject.name else None,
+                            "exam_date": exam.date if exam and exam.date else None,
+                            "start_time": exam.start_time if exam and exam.start_time else None,
+                            "duration": exam.duration if exam and exam.duration else None,
+                            })
+            hall_ticket =  {"student_name": f"{student.first_name}{student.middle_name}{student.last_name}" ,
+                            "student_batch" : student.batch.name,
+                            "student_course": student.course.name,
+                            "student_father_name": student.father_name , 
+                            "student_enrollment_number": student.enrollment_number ,
+                            "student_specialization":student_mapping.values_list('specialization__name' , flat=True) , 
+                            "student_term": term.name , 
+                            "subject_data": subject_data}
+            return response_handler(message="subject list fetyched successfully" , code = 200 , data=hall_ticket)
+        if type =="resit-2":
+            student_requested_subject = ResetExamRequest.objects.filter(student = student , term= term.id  , batch = student.batch.id , course = student.course.id)
+            subject_mapping = SubjectMapping.objects.filter(id__in=student_requested_subject.values_list('subjects', flat=True))
+
+            subject_data = []
+            for subject in subject_mapping:
+                exam = Exam.objects.filter(component__subject_mapping = subject).first()
+                subject_data.append({
+                            "subject_name": subject.subject.name if subject.subject and subject.subject.name else None,
+                            "exam_date": exam.date if exam and exam.date else None,
+                            "start_time": exam.start_time if exam and exam.start_time else None,
+                            "duration": exam.duration if exam and exam.duration else None,
+                            })
+            hall_ticket =  {"student_name": f"{student.first_name}{student.middle_name}{student.last_name}" ,
+                            "student_batch" : student.batch.name,
+                            "student_course": student.course.name,
+                            "student_father_name": student.father_name , 
+                            "student_enrollment_number": student.enrollment_number ,
+                            "student_specialization":student_mapping.values_list('specialization__name' , flat=True) , 
+                            "student_term": term.name , 
+                            "subject_data": subject_data}
+            return response_handler(message="subject list fetyched successfully" , code = 200 , data=hall_ticket)
+        

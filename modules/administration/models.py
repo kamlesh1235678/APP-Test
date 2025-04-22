@@ -432,6 +432,7 @@ class HallTicketAnnounce(models.Model):
     is_active =  models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now= True)
+    type = models.CharField(max_length=150 , choices=[("main" , "main") , ("resit-1" , "resit-1") , ("resit-2", "resit-2")] , default="main")
 
 
 
