@@ -258,7 +258,6 @@ def get_subject_data(student_id ,subject_mappings):
     return data
 
 
-
 class ExamResultGPAAPIView(APIView):
     def post(self, request):
         enrollment_number = request.data.get('enrollment_number')
@@ -268,33 +267,101 @@ class ExamResultGPAAPIView(APIView):
             student =  Student.objects.filter(enrollment_number = enrollment_number).first()
         except Student.DoesNotExist:
             return response_handler(message="Student not found" , code = 400 , data= {})
-
         student_id = student.id
         batch_id = student.batch.id
         course_id = student.course.id
-        student_specializations = StudentMapping.objects.filter(
-            student__id=student_id, 
-            batch_id=batch_id,
-            term_id=term_id,
-            course_id=course_id
-        ).values_list("specialization", flat=True)
-        subjects = SubjectMapping.objects.filter(
-            batch_id=batch_id,
-            term_id=term_id,
-            course__id=course_id,
-            specialization__id__in=student_specializations ,
-            type = type , 
-            is_active = True
-        ).select_related("subject").distinct()
-        
-
-        subject_data = get_subject_data(student_id ,subjects)
-        total_credit = sum(item['credit'] for item in subject_data.values())
-        total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
-        gpa = get_gpa(total_credit, total_credit_xgp)
+        if type == "main":
+            student_specializations = StudentMapping.objects.filter(
+                student__id=student_id, 
+                batch_id=batch_id,
+                term_id=term_id,
+                course_id=course_id
+            ).values_list("specialization", flat=True)
+            subjects = SubjectMapping.objects.filter(
+                batch_id=batch_id,
+                term_id=term_id,
+                course__id=course_id,
+                specialization__id__in=student_specializations ,
+                type = type , 
+                is_active = True
+            ).select_related("subject").distinct()
             
-        return JsonResponse({"message": "Term result retrieved successfully",  "code" :200 ,"data": list(subject_data.values())  , "extra":gpa })
-    
+
+            subject_data = get_subject_data(student_id ,subjects)
+            total_credit = sum(item['credit'] for item in subject_data.values())
+            total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+            gpa = get_gpa(total_credit, total_credit_xgp)
+                
+            return JsonResponse({"message": "Term result retrieved successfully",  "code" :200 ,"data": list(subject_data.values())  , "extra":gpa })
+        if type == "resit-1":
+            student_specializations = StudentMapping.objects.filter(
+                student__id=student_id, batch_id=batch_id, term_id=term_id, course_id=course_id
+            ).values_list("specialization", flat=True)
+
+            subjects = SubjectMapping.objects.filter(
+                batch_id=batch_id, term_id=term_id, course__id=course_id,
+                specialization__id__in=student_specializations, type="main"
+            ).select_related("subject").distinct()
+
+            reset1_subjects = SubjectMapping.objects.filter(
+                resets__batch_id=batch_id, resets__course_id=course_id,
+                resets__term_id=term_id, resets__student_id=student_id , type = "resit-1"
+            ).distinct()
+
+            subject_data = get_subject_data(student_id, subjects)
+            reset1_subject_data = get_subject_data(student_id, reset1_subjects)
+
+            for code, reset_data in reset1_subject_data.items():
+                if code in subject_data and not subject_data[code]['is_pass']:
+                    subject_data[code] = reset_data
+
+            total_credit = sum(item['credit'] for item in subject_data.values())
+            total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+            gpa = get_gpa(total_credit, total_credit_xgp)
+
+            return JsonResponse({"message": "Term Resit-1 result retrieved successfully", "code": 200, "data": list(subject_data.values()), "extra": gpa})
+        if type == "resit-2":
+            student_specializations = StudentMapping.objects.filter(
+                student__id=student_id, batch_id=batch_id, term_id=term_id, course_id=course_id
+            ).values_list("specialization", flat=True)
+
+            subjects = SubjectMapping.objects.filter(
+                batch_id=batch_id, term_id=term_id, course__id=course_id,
+                specialization__id__in=student_specializations, type="main"
+            ).select_related("subject").distinct()
+
+            reset1_subjects = SubjectMapping.objects.filter(
+                resets__batch_id=batch_id, resets__course_id=course_id,
+                resets__term_id=term_id, resets__student_id=student_id , type = "resit-1"
+            ).distinct()
+
+            reset2_subjects = SubjectMapping.objects.filter(
+                resets__batch_id=batch_id, resets__course_id=course_id,
+                resets__term_id=term_id, resets__student_id=student_id , type = "resit-2"
+            ).distinct()
+            # import pdb; pdb.set_trace()
+
+            subject_data = get_subject_data(student_id, subjects)
+            reset1_subject_data = get_subject_data(student_id, reset1_subjects)
+            reset2_subject_data = get_subject_data(student_id, reset2_subjects)
+
+            for code, reset_data in reset1_subject_data.items():
+                if code in subject_data and not subject_data[code]['is_pass']:
+                    subject_data[code] = reset_data
+            for code, reset_data in reset2_subject_data.items():
+                if code in reset1_subject_data and not reset1_subject_data[code]['is_pass']:
+                    subject_data[code] = reset_data
+
+            total_credit = sum(item['credit'] for item in subject_data.values())
+            total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+            gpa = get_gpa(total_credit, total_credit_xgp)
+
+            return JsonResponse({"message": "Term Resit-2 result retrieved successfully", "code": 200, "data": list(subject_data.values()), "extra": gpa})
+
+
+
+
+        
 
 
 class SubjectMappingSyllabusPagination(PageNumberPagination):
