@@ -264,7 +264,11 @@ class ExamResultGPAAPIView(APIView):
         enrollment_number = request.data.get('enrollment_number')
         type = request.data.get('type')
         term_id = request.data.get('term')
-        student =  Student.objects.filter(enrollment_number = enrollment_number).first()
+        try:
+            student =  Student.objects.filter(enrollment_number = enrollment_number).first()
+        except Student.DoesNotExist:
+            return response_handler(message="Student not found" , code = 400 , data= {})
+
         student_id = student.id
         batch_id = student.batch.id
         course_id = student.course.id

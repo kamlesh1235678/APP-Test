@@ -184,6 +184,7 @@ class EmployeeSingleListAPIView(APIView):
 
 
 
+
 class StudentSingleListAPIView(APIView):
     def get(self, request):
         course = request.query_params.get('course')
@@ -310,3 +311,29 @@ class StudentBatchwise(APIView):
         student = Student.objects.filter(batch = batch)
         student = StudentMixSerializer(student ,many = True)
         return response_handler(message="student list fetched successfully" , code = 200 , data = student.data)
+    
+
+
+class AllEmployeeSingleListAPIView(APIView):
+    def get(self, request):
+        employee = Employee.objects.all().order_by('-id')
+        return Response({"message": "Employee fetched successfully", "data": EmployeeMixSerializer(employee, many=True).data})
+
+class ResitSubjectMappingFilterAPIview(APIView):
+    def get(self, request):
+        type = request.query_params.get('type')
+        batch = request.query_params.get('batch')
+        term = request.query_params.get('term')
+        course = request.query_params.get('course')
+        filters = Q()
+        if type:
+            filters &= Q(type=type)
+        if batch:
+            filters &= Q(batch=batch)
+        if term:
+            filters &= Q(term=term)
+        if course:
+            filters &= Q(course=course)
+        subject_mappings = SubjectMapping.objects.filter(filters)
+        subject_mappings = SubjectMappingMixSerializer(subject_mappings , many = True)
+        return response_handler(message="resit subject mapping fetched successfully" , code = 200, data=subject_mappings.data)

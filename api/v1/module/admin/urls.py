@@ -138,6 +138,9 @@ urlpatterns = [
   path('student-wise-exam-list/<int:student_id>' , StudentWiseExamList.as_view() , name="student-wise-exam-list"),
   path('subject-mapping-status' , SubjectMappingStatusAPIview.as_view() , name="subject-mapping-status"),
   path('batch-wise-exam-result-announced/<int:batch>' , BatchWiseExamResultAnnounce.as_view() , name  = "batch-wise-exam-result-announced"),
+  path('all-employee_list' , AllEmployeeSingleListAPIView.as_view() , name = "all-employee-list") ,
+  path('resit-subject-mapping-filter' , ResitSubjectMappingFilterAPIview.as_view() , name = "resit-subject-mapping-filter") ,
+  path('resit-request-bulk' , ResitrequestBulkAPIView.as_view() , name="resit-request-bulk")
 ]
 
                                                                                                                                                                                          

@@ -289,7 +289,6 @@ class ResetExamRequest(models.Model):
     batch = models.ForeignKey(Batch, on_delete=models.PROTECT, related_name="resets")
     term = models.ForeignKey(Terms, on_delete=models.PROTECT, related_name="resets")
     course = models.ForeignKey(Course , on_delete= models.PROTECT  , related_name= 'resets')
-    specialization = models.ForeignKey(Specialization, on_delete=models.PROTECT ,  related_name="resets")
     student = models.ForeignKey("users.Student", on_delete=models.PROTECT , related_name="resets")
     subjects = models.ForeignKey(SubjectMapping ,on_delete=models.PROTECT, related_name="resets" )
     status = models.CharField(max_length=20, choices=[("Pending", "Pending"), ("Approved", "Approved")], default="Pending")

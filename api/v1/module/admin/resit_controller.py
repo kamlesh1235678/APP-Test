@@ -217,3 +217,31 @@ class StudentReset1SubjectWiseGPAAPIView(APIView):
         gpa = get_gpa(total_credit, total_credit_xgp)
 
         return JsonResponse({"message": "Term result retrieved successfully", "code": 200, "data": list(subject_data.values()), "extra": gpa})
+
+class ResitrequestBulkAPIView(APIView):
+    def post(self, request):
+        type = request.data.get("type")
+        student_id = request.data.get("student")
+        subjects = request.data.get("subjects")
+        term = request.data.get("term")
+
+        if not all([type, student_id, subjects, term]):
+            return response_handler(message="Missing required fields" , code = 400 , data= {})
+        try:
+            student = Student.objects.select_related("course", "batch").get(id=student_id)
+        except Student.DoesNotExist:
+            return response_handler(message="Student not found" , code = 400 , data= {})
+        reset_requests = []
+        for subject_id in subjects:
+            reset_requests.append(ResetExamRequest(
+                student=student,
+                course=student.course,
+                batch=student.batch,
+                term_id=term,
+                subjects_id=subject_id,
+                type=type
+            ))
+        ResetExamRequest.objects.bulk_create(reset_requests)
+
+        return response_handler(message="Reset requests created successfully" , code = 200 , data= {})
+
