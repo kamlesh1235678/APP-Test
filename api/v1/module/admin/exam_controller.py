@@ -309,7 +309,6 @@ class ExamResultAnnounceModelViewSet(viewsets.ModelViewSet):
     pagination_class = ExamResultAnnouncePagination
     http_method_names = ['get' , 'post' , 'put' , 'delete']
     filter_backends = [SearchFilter , DjangoFilterBackend]
-    filterset_fields = ['name']
 
 
     def get_queryset(self):
@@ -366,58 +365,3 @@ class BatchWiseExamResultAnnounce(APIView):
         announced = ExamResultAnnounceListSerializer(announced , many = True)
         return response_handler(message="exam result announced successfully" , code =200 , data = announced.data)
     
-
-
-# class StudentMainSubjectWiseGPAAPIView(APIView):
-#     def get(self,request ,  student_id, batch_id, term_id, course_id):
-#         student_specializations = StudentMapping.objects.filter(
-#             student__id=student_id, 
-#             batch_id=batch_id,
-#             term_id=term_id,
-#             course_id=course_id
-#         ).values_list("specialization", flat=True)
-#         subjects = SubjectMapping.objects.filter(
-#             batch_id=batch_id,
-#             term_id=term_id,
-#             course__id=course_id,
-#             specialization__id__in=student_specializations ,
-#             type = "main" 
-#         ).select_related("subject").distinct()
-        
-
-#         subject_data = get_subject_data(student_id ,subjects)
-#         total_credit = sum(item['credit'] for item in subject_data.values())
-#         total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
-#         gpa = get_gpa(total_credit, total_credit_xgp)
-            
-#         return JsonResponse({"message": "Term result retrieved successfully",  "code" :200 ,"data": list(subject_data.values())  , "extra":gpa })
-    
-# class ExamResultAPIView(APIView):
-#     def post(self, request):
-#         enrollment_number = request.data.get('enrollment_number')
-#         type = request.data.get('type')
-#         term_id = request.data.get('term')
-#         student =  Student.objects.filter(enrollment_number = enrollment_number).first()
-#         student_id = student.id
-#         batch_id = student.batch.id
-#         course_id = student.course.id
-#         student_specializations = StudentMapping.objects.filter(
-#             student__id=student_id, 
-#             batch_id=batch_id,
-#             term_id=term_id,
-#             course_id=course_id
-#         ).values_list("specialization", flat=True)
-#         subjects = SubjectMapping.objects.filter(
-#             batch_id=batch_id,
-#             term_id=term_id,
-#             course__id=course_id,
-#             specialization__id__in=student_specializations ,
-#             type = type
-#         ).select_related("subject").distinct()
-        
-
-#         subject_data = get_subject_data(student_id ,subjects)
-#         total_credit = sum(item['credit'] for item in subject_data.values())
-#         total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
-#         gpa = get_gpa(total_credit, total_credit_xgp)
-#         return response_handler(message="" , code= 200 , data={})
