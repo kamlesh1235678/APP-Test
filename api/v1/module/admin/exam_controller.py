@@ -310,7 +310,11 @@ class ExamResultAnnounceModelViewSet(viewsets.ModelViewSet):
     http_method_names = ['get' , 'post' , 'put' , 'delete']
     filter_backends = [SearchFilter , DjangoFilterBackend]
 
-
+    def get_serializer_class(self):
+        if self.request.method =='GET':
+            return ExamResultAnnounceListSerializer
+        return ExamResultAnnounceSerializer
+    
     def get_queryset(self):
         try:
             return super().get_queryset()
