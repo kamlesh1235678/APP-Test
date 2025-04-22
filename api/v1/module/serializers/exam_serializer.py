@@ -71,3 +71,18 @@ class ExamListtSerializer(serializers.ModelSerializer):
     def get_term_name(self, obj):
         if obj:
             return obj.component.subject_mapping.term.name
+        
+
+class ExamResultAnnounceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExamResultAnnounce
+        fields = "__all__"
+
+
+
+class ExamResultAnnounceListSerializer(serializers.ModelSerializer):
+    batch =  BatchMixSerializer()
+    term  = TermsMixSerializer()
+    class Meta:
+        model = ExamResultAnnounce
+        fields = "__all__"

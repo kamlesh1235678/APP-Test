@@ -259,8 +259,15 @@ def get_subject_data(student_id ,subject_mappings):
 
 
 
-class StudentMainSubjectWiseGPAAPIView(APIView):
-    def get(self,request ,  student_id, batch_id, term_id, course_id):
+class ExamResultGPAAPIView(APIView):
+    def post(self, request):
+        enrollment_number = request.data.get('enrollment_number')
+        type = request.data.get('type')
+        term_id = request.data.get('term')
+        student =  Student.objects.filter(enrollment_number = enrollment_number).first()
+        student_id = student.id
+        batch_id = student.batch.id
+        course_id = student.course.id
         student_specializations = StudentMapping.objects.filter(
             student__id=student_id, 
             batch_id=batch_id,
@@ -272,7 +279,8 @@ class StudentMainSubjectWiseGPAAPIView(APIView):
             term_id=term_id,
             course__id=course_id,
             specialization__id__in=student_specializations ,
-            type = "main" 
+            type = type , 
+            is_active = True
         ).select_related("subject").distinct()
         
 

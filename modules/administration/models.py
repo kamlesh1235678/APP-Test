@@ -433,3 +433,13 @@ class HallTicketAnnounce(models.Model):
     is_active =  models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now= True)
+
+
+
+class ExamResultAnnounce(models.Model):
+    batch = models.ForeignKey(Batch , on_delete=models.PROTECT , related_name="exam_result")
+    term = models.ForeignKey(Terms , on_delete=models.PROTECT , related_name="exam_result")
+    type = models.CharField(max_length=150 , choices=[("main" , "main") , ("resit-1" , "resit-1") , ("resit-2", "resit-2")])
+    is_active =  models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now= True)

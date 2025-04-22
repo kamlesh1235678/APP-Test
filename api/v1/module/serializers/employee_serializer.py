@@ -32,7 +32,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 class EmployeeListSerializer(serializers.ModelSerializer):
     user = UserListSerializer()
     institute_department = DepartmentSerializer()
-    employee_role = RoleSerializer()
+    employee_role = RoleSerializer(many=True)
     designation = DesignationSerializer()
     salutation = SalutationSerializer()
 

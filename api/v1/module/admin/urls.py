@@ -59,6 +59,7 @@ router.register(r'subject-syllabus-viewset' , SubjectMappingSyllabusModelViewSet
 router.register(r'sub-component-answer-viewset' , SubComponentAnswersModelViewSet)
 router.register(r'events-viewset' , EventsModelViewSet)
 router.register(r'hall-ticket-viewset' , HallTicketAnnounceModelViewSet)
+router.register(r'exam-result-viewset' , ExamResultAnnounceModelViewSet)
 
 
 def base_view(request):
@@ -77,7 +78,7 @@ urlpatterns = [
   path('student-profile', StudentProfileAPIView.as_view() , name = "student-profile"),
   path('employee-profile', EmployeeProfileAPIView.as_view() , name = "employee-profile"),
   path('choose-specialization/<int:term_id>', StudentSpecializationAPIView.as_view() , name = "choose-specilaization"),
-  path('student-gpa/<int:student_id>/<int:batch_id>/<int:course_id>/<int:term_id>', StudentMainSubjectWiseGPAAPIView.as_view() , name = "student-gpa"),
+  path('student-result', ExamResultGPAAPIView.as_view() , name = "student-result"),
   path('resit-component-marks/<int:component_id>' , ResetStudentComponentMarksUpdateAPI.as_view() , name = "resit-component-marks"),
   path('resit-student-gpa/<int:student_id>/<int:batch_id>/<int:course_id>/<int:term_id>', StudentReset1SubjectWiseGPAAPIView.as_view() , name = "resit-student-gpa"),
   path('send-otp', SendOtpAPIView.as_view(), name='send-otp'),
@@ -136,6 +137,7 @@ urlpatterns = [
   path('batch-wise-student/<int:batch>' , StudentBatchwise.as_view() , name="batch-wise-student"),
   path('student-wise-exam-list/<int:student_id>' , StudentWiseExamList.as_view() , name="student-wise-exam-list"),
   path('subject-mapping-status' , SubjectMappingStatusAPIview.as_view() , name="subject-mapping-status"),
+  path('batch-wise-exam-result-announced/<int:batch>' , BatchWiseExamResultAnnounce.as_view() , name  = "batch-wise-exam-result-announced"),
 ]
 
                                                                                                                                                                                          

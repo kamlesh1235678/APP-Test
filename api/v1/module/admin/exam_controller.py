@@ -286,3 +286,138 @@ class StudentWiseExamList(APIView):
         exams = Exam.objects.filter(component__in=components).order_by('date')
         exam_data = ExamListtSerializer(exams, many=True).data
         return response_handler(message="Exam list fetched successfully",code=200, data=exam_data)
+    
+
+
+
+
+
+class ExamResultAnnouncePagination(PageNumberPagination):
+    page_size = 10 
+    def get_paginated_response(self, data):
+        total_items = self.page.paginator.count
+        if not total_items:
+            return Response({'message':'ExamResultAnnounce no found' , 'code':400 , 'data': {} , 'extra':{}})
+        if self.page_size:
+            total_page = math.ceil(total_items/self.page_size)
+        message = "ExamResultAnnounce list fetch successfully"
+        return Response({'message':message , 'code':200 , 'data':data , 'extra': {'count':total_items , 'total': total_page , 'page_size': self.page_size}})
+
+class ExamResultAnnounceModelViewSet(viewsets.ModelViewSet):
+    queryset = ExamResultAnnounce.objects.all().order_by('-id')
+    serializer_class = ExamResultAnnounceSerializer
+    pagination_class = ExamResultAnnouncePagination
+    http_method_names = ['get' , 'post' , 'put' , 'delete']
+    filter_backends = [SearchFilter , DjangoFilterBackend]
+    filterset_fields = ['name']
+
+
+    def get_queryset(self):
+        try:
+            return super().get_queryset()
+        except:
+            message = "ExamResultAnnounce lsit fetch successfully"
+            return response_handler(message=message, code=400 , data= {})
+        
+    def create(self, request, *args, **kwargs):
+        try:
+            response = super().create(request , *args , **kwargs)
+            message = "ExamResultAnnounce create successfully"
+            return response_handler(message=message , code= 200 , data = response.data)
+        except ValidationError as e:
+            return response_handler( message=format_serializer_errors(e.detail), code=400,data={})
+        except Exception as e:
+            if isinstance(e.args[0], dict):  
+                formatted_errors = format_serializer_errors(e.args[0])
+                return response_handler(message=formatted_errors[0], code=400, data={})
+            else:
+                return response_handler(message=str(e), code=400, data={})
+    
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.serializer_class(instance , data = request.data , partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            message = "ExamResultAnnounce updated successfully"
+            return response_handler(message= message , code = 200 , data = serializer.data )
+        message = format_serializer_errors(serializer.errors)[0]
+        return response_handler(message=message , code= 400 , data= {})
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        message = "ExamResultAnnounce data retrived successfully"
+        return response_handler(message= message , code= 200 , data=serializer.data)
+    
+    def destroy(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            message = "ExamResultAnnounce delete successfully"
+            return response_handler(message= message , code = 200 , data= {})
+        except:
+            message = "ExamResultAnnounce no found"
+            return response_handler(message= message , code = 400 , data= {})
+        
+
+class BatchWiseExamResultAnnounce(APIView):
+    def get(self, request , batch):
+        announced =  ExamResultAnnounce.objects.filter(batch = batch , is_active = True)
+        announced = ExamResultAnnounceListSerializer(announced , many = True)
+        return response_handler(message="exam result announced successfully" , code =200 , data = announced.data)
+    
+
+
+# class StudentMainSubjectWiseGPAAPIView(APIView):
+#     def get(self,request ,  student_id, batch_id, term_id, course_id):
+#         student_specializations = StudentMapping.objects.filter(
+#             student__id=student_id, 
+#             batch_id=batch_id,
+#             term_id=term_id,
+#             course_id=course_id
+#         ).values_list("specialization", flat=True)
+#         subjects = SubjectMapping.objects.filter(
+#             batch_id=batch_id,
+#             term_id=term_id,
+#             course__id=course_id,
+#             specialization__id__in=student_specializations ,
+#             type = "main" 
+#         ).select_related("subject").distinct()
+        
+
+#         subject_data = get_subject_data(student_id ,subjects)
+#         total_credit = sum(item['credit'] for item in subject_data.values())
+#         total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+#         gpa = get_gpa(total_credit, total_credit_xgp)
+            
+#         return JsonResponse({"message": "Term result retrieved successfully",  "code" :200 ,"data": list(subject_data.values())  , "extra":gpa })
+    
+# class ExamResultAPIView(APIView):
+#     def post(self, request):
+#         enrollment_number = request.data.get('enrollment_number')
+#         type = request.data.get('type')
+#         term_id = request.data.get('term')
+#         student =  Student.objects.filter(enrollment_number = enrollment_number).first()
+#         student_id = student.id
+#         batch_id = student.batch.id
+#         course_id = student.course.id
+#         student_specializations = StudentMapping.objects.filter(
+#             student__id=student_id, 
+#             batch_id=batch_id,
+#             term_id=term_id,
+#             course_id=course_id
+#         ).values_list("specialization", flat=True)
+#         subjects = SubjectMapping.objects.filter(
+#             batch_id=batch_id,
+#             term_id=term_id,
+#             course__id=course_id,
+#             specialization__id__in=student_specializations ,
+#             type = type
+#         ).select_related("subject").distinct()
+        
+
+#         subject_data = get_subject_data(student_id ,subjects)
+#         total_credit = sum(item['credit'] for item in subject_data.values())
+#         total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+#         gpa = get_gpa(total_credit, total_credit_xgp)
+#         return response_handler(message="" , code= 200 , data={})
