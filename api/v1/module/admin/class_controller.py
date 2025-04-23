@@ -258,7 +258,7 @@ class AttendanceSummary(APIView):
         student_mappings = StudentMapping.objects.filter(student=student)
         
         # Step 1: Get student's subjects
-        subject_mappings = SubjectMapping.objects.filter(
+        subject_mapping = SubjectMapping.objects.filter(
             batch=student.batch,
             course=student.course,
             specialization__in=student_mappings.values_list("specialization", flat=True),
@@ -269,7 +269,7 @@ class AttendanceSummary(APIView):
             resets__student=student,
             is_active = True).distinct() ## for  requested resit subject
         
-        subject_mappings = list(subject_mappings.union(resit_subjects))
+        subject_mappings = subject_mapping.union(resit_subjects)
         # Step 2: Get class schedules for the subjects in the last 'days'
         class_schedules = ClassSchedule.objects.filter(
             date__range=[start_date, today],
@@ -442,7 +442,7 @@ class UpComeingStudentClassAPIView(APIView):
             is_active = True).distinct() # for requested resit subject
 
         # Combine both regular and resit subject mappings
-        combined_subjects = list(subject_mappings.union(resit_subjects))
+        combined_subjects = subject_mappings.union(resit_subjects)
         filters = Q()
         if mapping:
             filters &= Q(pk=mapping)
