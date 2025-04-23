@@ -282,10 +282,15 @@ class StudentWiseExamList(APIView):
         else:
             subject_mappings = SubjectMapping.objects.filter(term = term)
         subject_mappings = subject_mappings.filter(
-            batch=student.batch,
-            course=student.course,
-            specialization__in=student_mapping.values_list('specialization', flat=True)
-        )
+                        Q(
+                            batch=student.batch,
+                            course=student.course,
+                            type="main",
+                        ) |
+                        Q(
+                            resets__student=student,    ## for  requested resit subject
+                        )
+                    ).distinct()
         components = Component.objects.filter(subject_mapping__in=subject_mappings)
         exams = Exam.objects.filter(component__in=components).order_by('date')
         exam_data = ExamListtSerializer(exams, many=True).data

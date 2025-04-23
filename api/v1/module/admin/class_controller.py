@@ -172,7 +172,11 @@ class ClassAttendanceAPIView(APIView):
         batch = class_schedule.mapping.batch
         term =  class_schedule.mapping.term
         specialization= class_schedule.mapping.specialization.all()
-        students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+        type = class_schedule.mapping.type
+        if type == "main":
+            students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+        else:
+            students = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , type= type).distinct()
         student_serializer = StudentAttendanceSerializer(instance = students , many = True)
         student_attendance = {attendance.student.id : {"is_persent": attendance.is_persent, "ce_marks": attendance.ce_marks} for attendance in Attendance.objects.filter(class_schedule = class_id)}
         for student in student_serializer.data:
@@ -194,7 +198,11 @@ class ClassAttendanceAPIView(APIView):
         batch = class_schedule.mapping.batch
         term =  class_schedule.mapping.term
         specialization= class_schedule.mapping.specialization.all()
-        students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+        type = class_schedule.mapping.type
+        if type == "main":
+            students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+        else:
+            students = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , type= type).distinct()
         student_class_info = request.data.get("student_class_info" ,[])
         student_class_info_dict = {item['id'] : {"is_persent": item['is_persent'] , "ce_marks": item['ce_marks']} for item in student_class_info}
         is_valid = set(student_class_info_dict.keys()).issubset(set(students.values_list('id' , flat=True)))
