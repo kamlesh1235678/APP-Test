@@ -434,8 +434,11 @@ class StudentComponentAnswer(APIView):
         batch = component.subject_mapping.batch
         term =  component.subject_mapping.term
         specialization= component.subject_mapping.specialization.all()
-        component_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct()
-        # import pdb; pdb.set_trace()
+        type = component.subject_mapping.type
+        if type == "main":
+            component_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+        else:
+            component_student = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , resets__type= type).distinct()
         students_data = []
         for student in component_student:
             one_student =  StudentMixSerializer(student).data
@@ -488,7 +491,11 @@ class StudentSubComponentAnswer(APIView):
         batch = subcomponent.component.subject_mapping.batch
         term =  subcomponent.component.subject_mapping.term
         specialization= subcomponent.component.subject_mapping.specialization.all()
-        subcomponent_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct()
+        type = subcomponent.component.subject_mapping.type
+        if type == "main":
+            subcomponent_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+        else:
+            subcomponent_student = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , resets__type= type).distinct()
         students_data = []
         for student in subcomponent_student:
             one_student =  StudentMixSerializer(student).data

@@ -463,3 +463,29 @@ class SubjectMappingStatusAPIview(APIView):
         for subject_mapping in subject_mapping_ids:
             SubjectMapping.objects.filter(pk = subject_mapping[0]).update(is_active = subject_mapping[1])
         return response_handler(message="Status Update successfully" , code = 200 , data={})
+    
+
+class SubjectMappingNotesAPI(APIView):
+    def get(self, request, subject_mapping_id):
+        try:
+            Notes = SubjectMappingNotes.objects.get(mapping_id=subject_mapping_id)
+            serializer = SubjectMappingNotesListSerializer(Notes)
+            return response_handler(message= "Notes data retrived successfully" , code = 200 , data= serializer.data)
+            
+        except SubjectMappingNotes.DoesNotExist:
+            return response_handler(message= "Notes not found" , code = 400 , data= {})
+
+    def post(self, request, subject_mapping_id):
+        try:
+            Notes, created = SubjectMappingNotes.objects.get_or_create(
+                mapping_id=subject_mapping_id,
+                defaults={'description': request.data.get('description', '')}
+            )
+            if not created:
+                Notes.description = request.data.get('description', Notes.description)
+                Notes.save()
+
+            serializer = SubjectMappingNotesSerializer(Notes)
+            return response_handler(message= "Notes data updated successfully" , code = 200 , data= serializer.data)
+        except SubjectMapping.DoesNotExist:
+            return response_handler(message= "Invalid subject mapping id" , code = 400 , data= {})

@@ -67,4 +67,14 @@ class SubjectMappingSyllabusListSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SubjectMappingNotesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubjectMappingNotes
+        fields = "__all__"
+
+class SubjectMappingNotesListSerializer(serializers.ModelSerializer):
+    mapping = SubjectMappingListSerializer()
+    class Meta:
+        model = SubjectMappingNotes
+        fields = "__all__"
 

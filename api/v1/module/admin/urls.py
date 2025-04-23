@@ -142,6 +142,7 @@ urlpatterns = [
   path('resit-subject-mapping-filter' , ResitSubjectMappingFilterAPIview.as_view() , name = "resit-subject-mapping-filter") ,
   path('resit-request-bulk' , ResitrequestBulkAPIView.as_view() , name="resit-request-bulk"),
   path('student-list-filter' , ResitMainStudentListAPIView.as_view() , name="student-list-filter"),
+  path('subject-mapping-notes/<int:subject_mapping_id>', SubjectMappingNotesAPI.as_view(), name='subject-mapping-notes'),
 ]
 
                                                                                                                                                                                          

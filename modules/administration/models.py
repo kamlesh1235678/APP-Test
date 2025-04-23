@@ -443,3 +443,10 @@ class ExamResultAnnounce(models.Model):
     is_active =  models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now= True)
+
+
+class SubjectMappingNotes(models.Model):
+    mapping = models.ForeignKey(SubjectMapping , on_delete= models.PROTECT  , related_name="subject_notes")
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
