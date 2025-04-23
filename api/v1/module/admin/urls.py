@@ -140,7 +140,8 @@ urlpatterns = [
   path('batch-wise-exam-result-announced/<int:batch>' , BatchWiseExamResultAnnounce.as_view() , name  = "batch-wise-exam-result-announced"),
   path('all-employee_list' , AllEmployeeSingleListAPIView.as_view() , name = "all-employee-list") ,
   path('resit-subject-mapping-filter' , ResitSubjectMappingFilterAPIview.as_view() , name = "resit-subject-mapping-filter") ,
-  path('resit-request-bulk' , ResitrequestBulkAPIView.as_view() , name="resit-request-bulk")
+  path('resit-request-bulk' , ResitrequestBulkAPIView.as_view() , name="resit-request-bulk"),
+  path('student-list-filter' , ResitMainStudentListAPIView.as_view() , name="student-list-filter"),
 ]
 
                                                                                                                                                                                          

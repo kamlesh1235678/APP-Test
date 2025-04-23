@@ -274,12 +274,16 @@ class BatchWiseHallTicketAnnounce(APIView):
 
 class StudentWiseExamList(APIView):
     def get(self, request, student_id):
+        term = request.query_params.get('term')
         student = get_object_or_404(Student, id=student_id)
         student_mapping = StudentMapping.objects.filter(student=student)
-        subject_mappings = SubjectMapping.objects.filter(
+        if not term:
+            subject_mappings = SubjectMapping.objects.filter(is_active = True)
+        else:
+            subject_mappings = SubjectMapping.objects.filter(term = term)
+        subject_mappings = subject_mappings.filter(
             batch=student.batch,
             course=student.course,
-            term__in=student_mapping.values_list('term', flat=True),
             specialization__in=student_mapping.values_list('specialization', flat=True)
         )
         components = Component.objects.filter(subject_mapping__in=subject_mappings)

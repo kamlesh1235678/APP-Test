@@ -159,13 +159,9 @@ def get_current_terms():
 class FAcultyFilterAPIView(APIView):
     def get(self, request):
         faculty = request.query_params.get('faculty')
-        # current_terms = get_current_terms()
-        # import pdb; pdb.set_trace()
         filters = Q()
         if faculty:
             filters &= Q(faculty_id=faculty , is_active =True) # there is active for current subject
-        # if current_terms:
-        #     filters &= Q(term__in=current_terms)
         
         subject_assign = SubjectMapping.objects.filter(filters).distinct().order_by('-id')
 
@@ -249,9 +245,16 @@ class SubjectStudentWise(APIView):
         subject_mapping = SubjectMapping.objects.filter(
             batch = student.batch,
             course = student.course,
-            term__in = student_mapping.values_list('term' , flat=True),
+            is_active = True,
             specialization__in = student_mapping.values_list('specialization' , flat=True))
-        subject_mapping = SubjectMappingListSerializer(subject_mapping , many = True)
+        
+        resit_subjects = SubjectMapping.objects.filter(
+            resets__student=student,
+            is_active = True).distinct()
+
+        # Combine both regular and resit subject mappings
+        combined_subjects = subject_mapping.union(resit_subjects)
+        subject_mapping = SubjectMappingListSerializer(combined_subjects , many = True)
         return response_handler(message="subject list fetyched successfully" , code = 200 , data=subject_mapping.data)
     
 
@@ -337,3 +340,34 @@ class ResitSubjectMappingFilterAPIview(APIView):
         subject_mappings = SubjectMapping.objects.filter(filters)
         subject_mappings = SubjectMappingMixSerializer(subject_mappings , many = True)
         return response_handler(message="resit subject mapping fetched successfully" , code = 200, data=subject_mappings.data)
+    
+
+
+
+class ResitMainStudentListAPIView(APIView):
+    def get(self, request):
+        term = request.query_params.get('term')
+        batch = request.query_params.get('batch')
+        type = request.query_params.get('type')
+        if type == 'main':
+            student = Student.objects.filter(
+                    student_mappings__batch_id=batch,
+                    student_mappings__term_id=term,
+                ).distinct().order_by('-id')
+            return response_handler(message = "Student fetched successfully", data = StudentMixSerializer(student, many=True).data , code=200)
+        elif type == "resit-1":
+            student = Student.objects.filter(
+                    resets__batch_id=batch,
+                    resets__term_id=term ,
+                    type = type
+                ).distinct().order_by('-id')
+            return response_handler(message = "Student fetched successfully", data = StudentMixSerializer(student, many=True).data , code = 200)
+        elif type == "resit-2":
+            student = Student.objects.filter(
+                    resets__batch_id=batch,
+                    resets__term_id=term ,
+                    type = type
+                ).distinct().order_by('-id')
+            return response_handler(message = "Student fetched successfully", data=  StudentMixSerializer(student, many=True).data , code=200)
+        else:
+            return response_handler(message = "Student fetched successfully" ,data = {} , code = 400)
