@@ -4,6 +4,7 @@ from modules.users.models import *
 from api.v1.module.serializers.student_serializer import *
 from django.utils.timezone import now
 from datetime import datetime
+from django.db.models import Q
 
 
 class SpecializationMixSerializer(serializers.ModelSerializer):
@@ -137,11 +138,18 @@ class DashBoardStudentDataSerializer(serializers.ModelSerializer):
         
         # Get the subject mappings based on student batch, course, term, and specialization
         subject_mappings = SubjectMapping.objects.filter(
-            batch=student.batch,
-            course=student.course,
-            term__in=student_mappings.values_list("term", flat=True),
-            specialization__in=student_mappings.values_list("specialization", flat=True)
-        )
+                    Q(
+                        batch=student.batch,
+                        course=student.course,
+                        type="main",
+                        is_active=True,
+                        specialization__in=student_mappings.values_list("specialization", flat=True)
+                    ) |
+                    Q(
+                        resets__student=student,   ## for  requested resit subject
+                        is_active=True
+                    )
+                ).distinct()
         
         # Get today's date and count upcoming classes
         today = datetime.today().date()

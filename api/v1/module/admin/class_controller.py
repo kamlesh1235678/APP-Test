@@ -267,7 +267,7 @@ class AttendanceSummary(APIView):
                             specialization__in=student_mappings.values_list("specialization", flat=True)
                         ) |
                         Q(
-                            resets__student=student,
+                            resets__student=student,  ## for  requested resit subject
                             is_active=True
                         )
                     ).distinct()
@@ -334,11 +334,18 @@ class AttendanceSummaryFilter(APIView):
 
         # Get student's subjects
         subject_mappings = SubjectMapping.objects.filter(
-            batch=student.batch,
-            course=student.course,
-            term__in=student_mappings.values_list("term", flat=True),
-            specialization__in=student_mappings.values_list("specialization", flat=True)
-        )
+                Q(
+                    batch=student.batch,
+                    course=student.course,
+                    type="main",
+                    is_active=True,
+                    specialization__in=student_mappings.values_list("specialization", flat=True) 
+                ) |
+                Q(
+                    resets__student=student,   ## for  requested resit subject
+                    is_active=True
+                )
+            ).distinct()
         
         if not term:
             subject_mappings = subject_mappings.filter(is_active = True)  # there is active for current subject
