@@ -246,6 +246,7 @@ class SubjectStudentWise(APIView):
             batch = student.batch,
             course = student.course,
             is_active = True,
+            type = "main",
             specialization__in = student_mapping.values_list('specialization' , flat=True))
         
         resit_subjects = SubjectMapping.objects.filter(
