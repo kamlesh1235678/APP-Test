@@ -174,7 +174,7 @@ class ClassAttendanceAPIView(APIView):
         specialization= class_schedule.mapping.specialization.all()
         type = class_schedule.mapping.type
         if type == "main":
-            students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+            students = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
         else:
             students = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type).distinct()
         student_serializer = StudentAttendanceSerializer(instance = students , many = True)
@@ -200,9 +200,9 @@ class ClassAttendanceAPIView(APIView):
         specialization= class_schedule.mapping.specialization.all()
         type = class_schedule.mapping.type
         if type == "main":
-            students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+            students = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
         else:
-            students = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , type= type).distinct()
+            students = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , resets__type= type).distinct()
         student_class_info = request.data.get("student_class_info" ,[])
         student_class_info_dict = {item['id'] : {"is_persent": item['is_persent'] , "ce_marks": item['ce_marks']} for item in student_class_info}
         is_valid = set(student_class_info_dict.keys()).issubset(set(students.values_list('id' , flat=True)))

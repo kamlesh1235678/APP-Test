@@ -125,7 +125,11 @@ class ComponentMarksAPIView(APIView):
         batch = component.subject_mapping.batch
         term =  component.subject_mapping.term
         specialization= component.subject_mapping.specialization.all()
-        component_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct()
+        type = component.subject_mapping.type
+        if type == "main":
+            component_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct()
+        else:
+            component_student = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type).distinct()
         student_serializer = StudentMixSerializer(component_student , many = True)
         student_marks = { mark.student.id : mark.obtained_marks for mark in ComponentMarks.objects.filter(component = component_id)}
         for student in student_serializer.data:
@@ -144,7 +148,11 @@ class ComponentMarksAPIView(APIView):
         batch = component.subject_mapping.batch
         term =  component.subject_mapping.term
         specialization= component.subject_mapping.specialization.all()
-        component_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct().values_list('id' , flat=True)
+        type = component.subject_mapping.type
+        if type == "main":
+            component_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct().values_list('id' , flat=True)
+        else:
+            component_student = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type).distinct().values_list('id' , flat=True)
         marks_objects = request.data.get('marks_student' , [])
         student_get_id = [marks_object['id'] for marks_object in marks_objects]
         if not set(student_get_id).issubset(set(component_student)):
@@ -170,7 +178,11 @@ class SubComponentMarksAPIView(APIView):
         batch = subcomponent.component.subject_mapping.batch
         term =  subcomponent.component.subject_mapping.term
         specialization= subcomponent.component.subject_mapping.specialization.all()
-        subcomponent_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct()
+        type = subcomponent.component.subject_mapping.type
+        if type == "main":
+            subcomponent_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct()
+        else:
+            subcomponent_student = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type).distinct()
         student_serializer = StudentMixSerializer(subcomponent_student , many = True)
         student_marks = { mark.student.id : mark.obtained_marks for mark in SubComponentMarks.objects.filter(subcomponent = subcomponent_id)}
         for student in student_serializer.data:
@@ -188,7 +200,11 @@ class SubComponentMarksAPIView(APIView):
         batch = subcomponent.component.subject_mapping.batch
         term =  subcomponent.component.subject_mapping.term
         specialization= subcomponent.component.subject_mapping.specialization.all()
-        subcomponent_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct().values_list('id' , flat=True)
+        type = subcomponent.component.subject_mapping.type
+        if type == "main":
+            subcomponent_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization).distinct().values_list('id' , flat=True)
+        else:
+            subcomponent_student = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type).distinct().values_list('id' , flat=True)
         marks_objects = request.data.get('marks_student' , [])
         student_get_id = [marks_object['id'] for marks_object in marks_objects]
         if not set(student_get_id).issubset(set(subcomponent_student)):
