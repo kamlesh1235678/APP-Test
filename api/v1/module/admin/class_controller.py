@@ -258,18 +258,19 @@ class AttendanceSummary(APIView):
         student_mappings = StudentMapping.objects.filter(student=student)
         
         # Step 1: Get student's subjects
-        subject_mapping = SubjectMapping.objects.filter(
-            batch=student.batch,
-            course=student.course,
-            specialization__in=student_mappings.values_list("specialization", flat=True),
-            is_active = True, # there is_active true for current term subject show 
-            type = "main"
-        )
-        resit_subjects = SubjectMapping.objects.filter(
-            resets__student=student,
-            is_active = True).distinct() ## for  requested resit subject
-        
-        subject_mappings = subject_mapping.union(resit_subjects)
+        subject_mappings = SubjectMapping.objects.filter(
+                        Q(
+                            batch=student.batch,
+                            course=student.course,
+                            type="main",
+                            is_active=True,
+                            specialization__in=student_mappings.values_list("specialization", flat=True)
+                        ) |
+                        Q(
+                            resets__student=student,
+                            is_active=True
+                        )
+                    ).distinct()
         # Step 2: Get class schedules for the subjects in the last 'days'
         class_schedules = ClassSchedule.objects.filter(
             date__range=[start_date, today],
@@ -431,24 +432,24 @@ class UpComeingStudentClassAPIView(APIView):
         
         # Step 1: Get student's subjects
         subject_mappings = SubjectMapping.objects.filter(
-            batch=student.batch,
-            course=student.course,
-            type = "main",
-            is_active = True,
-            specialization__in=student_mappings.values_list("specialization", flat=True)
-        )
-        resit_subjects = SubjectMapping.objects.filter(
-            resets__student=student,
-            is_active = True).distinct() # for requested resit subject
-
-        # Combine both regular and resit subject mappings
-        combined_subjects = subject_mappings.union(resit_subjects)
+                    Q(
+                        batch=student.batch,
+                        course=student.course,
+                        type="main",
+                        is_active=True,
+                        specialization__in=student_mappings.values_list("specialization", flat=True)
+                    ) |
+                    Q(
+                        resets__student=student,   ## for  requested resit subject
+                        is_active=True
+                    )
+                ).distinct()
         filters = Q()
         if mapping:
             filters &= Q(pk=mapping)
         if term:
             filters &= Q(term=term)
-        subject_mappings = combined_subjects.filter(filters)
+        subject_mappings = subject_mappings.filter(filters)
 
         today = datetime.today().date()
         
