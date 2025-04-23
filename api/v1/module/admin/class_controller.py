@@ -19,6 +19,7 @@ from django.utils.decorators import method_decorator
 from api.v1.module.admin.decorator import *
 from datetime import datetime, timedelta
 from django.db.models import Q
+from datetime import date
 
 
 class ClassScheduledPagination(PageNumberPagination):
@@ -397,6 +398,8 @@ class AttendanceSummaryFilter(APIView):
         if not s_date and not e_date and class_schedules.exists():
             s_date = class_schedules.order_by("date").first().date
             e_date = class_schedules.order_by("-date").first().date
+        else:
+            s_date = e_date = date.today()
 
         # Generate attendance summary
         attendance_summary = []
