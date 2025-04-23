@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from api.v1.module.serializers.admit_card_serializer import AdmitCardStudentSerializer
+from api.v1.module.admin.decorator import *
 
 class IDCardView(APIView):
     def get(self, request):
@@ -62,6 +63,7 @@ class IDCardView(APIView):
 
 
 class HallTicketWise(APIView):
+    @check_fee_status
     def get(self, request , student_id , term_id , type):
         student = get_object_or_404(Student , id = student_id)
         term =  get_object_or_404(Terms , id = term_id)
