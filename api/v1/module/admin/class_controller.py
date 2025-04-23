@@ -261,15 +261,19 @@ class AttendanceSummary(APIView):
         subject_mappings = SubjectMapping.objects.filter(
             batch=student.batch,
             course=student.course,
-            term__in=student_mappings.values_list("term", flat=True),
             specialization__in=student_mappings.values_list("specialization", flat=True),
-            is_active = True # there is_active true for current term subject show 
+            is_active = True, # there is_active true for current term subject show 
+            type = "main"
         )
+        resit_subjects = SubjectMapping.objects.filter(
+            resets__student=student,
+            is_active = True).distinct() ## for student  requested resit subject
         
+        combined_subjects = subject_mappings.union(resit_subjects)
         # Step 2: Get class schedules for the subjects in the last 'days'
         class_schedules = ClassSchedule.objects.filter(
             date__range=[start_date, today],
-            mapping__in=subject_mappings,
+            mapping__in=combined_subjects,
             is_cancel=False,
             is_complete=True
         )
@@ -429,15 +433,22 @@ class UpComeingStudentClassAPIView(APIView):
         subject_mappings = SubjectMapping.objects.filter(
             batch=student.batch,
             course=student.course,
-            term__in=student_mappings.values_list("term", flat=True),
+            type = "main",
+            is_active = True,
             specialization__in=student_mappings.values_list("specialization", flat=True)
         )
+        resit_subjects = SubjectMapping.objects.filter(
+            resets__student=student,
+            is_active = True).distinct() # for requested resit subject
+
+        # Combine both regular and resit subject mappings
+        combined_subjects = subject_mappings.union(resit_subjects)
         filters = Q()
         if mapping:
             filters &= Q(pk=mapping)
         if term:
             filters &= Q(term=term)
-        subject_mappings = subject_mappings.filter(filters)
+        subject_mappings = combined_subjects.filter(filters)
 
         today = datetime.today().date()
         

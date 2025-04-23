@@ -251,7 +251,7 @@ class SubjectStudentWise(APIView):
         
         resit_subjects = SubjectMapping.objects.filter(
             resets__student=student,
-            is_active = True).distinct()
+            is_active = True).distinct() # for requested resit subject
 
         # Combine both regular and resit subject mappings
         combined_subjects = subject_mapping.union(resit_subjects)
