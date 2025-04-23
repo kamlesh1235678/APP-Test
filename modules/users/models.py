@@ -216,8 +216,7 @@ class StudentDocument(models.Model):
 class StudentFeeStatus(models.Model):
     student = models.ForeignKey(Student, on_delete=models.PROTECT , related_name="student_fee")
     form_fee = models.BooleanField(default=False) #form fee status
-    program_fee_installment1_paid = models.BooleanField(default=False)  # Course fee installment1 status
-    program_fee_installment2_paid = models.BooleanField(default=False)  # Course fee installment2 status
+    program_fee_paid = models.BooleanField(default=False)  # Course fee installment status
     enrollment_fee_paid = models.BooleanField(default=False)  # Enrollment fee status
     caution_fee_tuition = models.BooleanField(default=False)  # Caution fee status
     extra_penalty = models.BooleanField(default=False)  # Penalty status

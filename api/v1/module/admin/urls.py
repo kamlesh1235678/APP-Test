@@ -26,6 +26,7 @@ from api.v1.module.admin.noticeboard_controller import *
 from api.v1.module.admin.leave_controller import *
 from api.v1.module.admin.events_controller import *
 from api.v1.module.admin.admit_card_controller import *
+from api.v1.module.admin.fee_controller import *
 
 
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -143,6 +144,7 @@ urlpatterns = [
   path('resit-request-bulk' , ResitrequestBulkAPIView.as_view() , name="resit-request-bulk"),
   path('student-list-filter' , ResitMainStudentListAPIView.as_view() , name="student-list-filter"),
   path('subject-mapping-notes/<int:subject_mapping_id>', SubjectMappingNotesAPI.as_view(), name='subject-mapping-notes'),
+  path('student-fee' , StudentFeeStatusAPIView.as_view() ,name = "student-fee")
 ]
 
                                                                                                                                                                                          

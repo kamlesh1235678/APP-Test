@@ -291,7 +291,7 @@ class ResetExamRequest(models.Model):
     course = models.ForeignKey(Course , on_delete= models.PROTECT  , related_name= 'resets')
     student = models.ForeignKey("users.Student", on_delete=models.PROTECT , related_name="resets")
     subjects = models.ForeignKey(SubjectMapping ,on_delete=models.PROTECT, related_name="resets" )
-    status = models.CharField(max_length=20, choices=[("Pending", "Pending"), ("Approved", "Approved")], default="Pending")
+    status = models.BooleanField(default=False)
     type = models.CharField(max_length=150  , choices=[("resit-1" , "resit-1") ,("resit-2" , "resit-2")])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

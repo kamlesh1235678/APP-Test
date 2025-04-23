@@ -360,14 +360,14 @@ class ResitMainStudentListAPIView(APIView):
             student = Student.objects.filter(
                     resets__batch_id=batch,
                     resets__term_id=term ,
-                    type = type
+                    resets__type = type
                 ).distinct().order_by('-id')
             return response_handler(message = "Student fetched successfully", data = StudentMixSerializer(student, many=True).data , code = 200)
         elif type == "resit-2":
             student = Student.objects.filter(
                     resets__batch_id=batch,
                     resets__term_id=term ,
-                    type = type
+                    resets__type = type
                 ).distinct().order_by('-id')
             return response_handler(message = "Student fetched successfully", data=  StudentMixSerializer(student, many=True).data , code=200)
         else:
