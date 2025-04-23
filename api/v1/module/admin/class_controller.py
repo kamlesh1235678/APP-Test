@@ -176,7 +176,7 @@ class ClassAttendanceAPIView(APIView):
         if type == "main":
             students = Student.objects.filter(course__in = course , batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
         else:
-            students = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , type= type).distinct()
+            students = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type).distinct()
         student_serializer = StudentAttendanceSerializer(instance = students , many = True)
         student_attendance = {attendance.student.id : {"is_persent": attendance.is_persent, "ce_marks": attendance.ce_marks} for attendance in Attendance.objects.filter(class_schedule = class_id)}
         for student in student_serializer.data:
