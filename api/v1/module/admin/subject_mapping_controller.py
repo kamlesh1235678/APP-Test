@@ -197,6 +197,14 @@ def get_gpa(total_credit,total_credit_xgp ):
     except:
         return 0
     
+def calculate_cgpa(term_wise):
+    terms = term_wise.values_list('term', flat=True).distinct()
+    total_gpa = 0
+    for term in terms:
+        gpa = term_wise.filter(term = term ).last().gpa
+        total_gpa =+ gpa
+    return round(total_gpa / len(terms), 2)
+    
 def att_percentage(student_id , subject_mapping_id):
     mapping_subject =  get_object_or_404(SubjectMapping , id = subject_mapping_id)
     student =  get_object_or_404(Student , id = student_id)
@@ -244,14 +252,15 @@ def get_subject_data(student_id ,subject_mappings):
             credit_xgp= 0
 
         data[sub_map.subject.code] = {
-            "Subject Name": sub_map.subject.name,
-            "Subject Code": sub_map.subject.code,
-            "External Marks": external_marks,
-            "Internal Marks": internal_marks,
+            "subject_mapping" : sub_map,
+            # "Subject Name": sub_map.subject.name,
+            # "Subject Code": sub_map.subject.code,
+            "external_marks": external_marks,
+            "internal_marks": internal_marks,
             "is_pass": is_pass ,
             "total_marks": total_marks,
             "grade": grade,
-            "credit": sub_map.subject.credit,
+            # "credit": sub_map.subject.credit,
             "grade_point": grade_point,
             "get_credit_xgp": credit_xgp
         }
@@ -489,3 +498,245 @@ class SubjectMappingNotesAPI(APIView):
             return response_handler(message= "Notes data updated successfully" , code = 200 , data= serializer.data)
         except SubjectMapping.DoesNotExist:
             return response_handler(message= "Invalid subject mapping id" , code = 400 , data= {})
+        
+
+
+
+class StudentFinalSubjectResultSavedAPIView(APIView):
+    def post(self, request):
+        batch_id = request.data.get('batch')
+        term_id = request.data.get('term')
+        course_id = request.data.get('course' , []) # courese is a list there 
+        type = request.data.get('type')
+        if not batch_id or not term_id or not type:
+            return response_handler(message="Missing required parameters", code=400, data={})
+        if type == "main":
+            student_mappings = StudentMapping.objects.filter(batch_id=batch_id,term_id=term_id,course__in = course_id)
+            students = Student.objects.filter(student_mappings__in=student_mappings).distinct()
+            if not students.exists():
+                return response_handler(message="No students found in the given batch and term", code=400, data={})
+            for student in students:
+                student_id = student.id
+                batch_id = student.batch.id
+                course_id = student.course.id
+                student_specializations = StudentMapping.objects.filter(
+                    student__id=student_id, 
+                    batch_id=batch_id,
+                    term_id=term_id,
+                    course_id=course_id
+                ).values_list("specialization", flat=True)
+                subjects = SubjectMapping.objects.filter(
+                    batch_id=batch_id,
+                    term_id=term_id,
+                    course__id=course_id,
+                    specialization__id__in=student_specializations ,
+                    type = type,
+                ).select_related("subject").distinct()
+
+                subject_data = get_subject_data(student_id ,subjects)
+                total_credit = sum(item['credit'] for item in subject_data.values())
+                total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+                gpa = get_gpa(total_credit, total_credit_xgp)
+                final_result , created   = FinalResult.objects.update_or_create(student=student,
+                        term_id=term_id,
+                        result_type = type ,
+                        defaults={
+                            'gpa':gpa ,
+                            'total_credit' : total_credit,
+                            "total_credit_xgp":total_credit_xgp
+                        })
+                for sub in subject_data.values():
+                    FinalSubjectResult.objects.update_or_create(
+                        final_result=final_result,
+                        subject_mapping = sub["subject_mapping"],
+                        defaults={
+                            'external_marks': sub['external_marks'],
+                            'internal_marks': sub['internal_marks'],
+                            'total_marks': sub['total_marks'],
+                            'is_pass': sub['is_pass'],
+                            'grade': sub['grade'],
+                            'grade_point': sub['grade_point'],
+                            'get_credit_xgp': sub['get_credit_xgp'],
+                        }
+                    )
+                    return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
+        elif type == "resit-1":
+            students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type)
+            if not students.exists():
+                return response_handler(message="No students found in the given batch and term", code=400, data={})
+            for student in students:
+                student_id = student.id
+                batch_id = student.batch.id
+                course_id = student.course.id
+                student_specializations = StudentMapping.objects.filter(
+                    student__id=student_id, 
+                    batch_id=batch_id,
+                    term_id=term_id,
+                    course_id=course_id
+                ).values_list("specialization", flat=True)
+                subjects = SubjectMapping.objects.filter(
+                    batch_id=batch_id, term_id=term_id, course__id=course_id,
+                    specialization__id__in=student_specializations, type="main"
+                ).select_related("subject").distinct()
+
+                reset1_subjects = SubjectMapping.objects.filter(
+                    resets__batch_id=batch_id, resets__course_id=course_id,
+                    resets__term_id=term_id, resets__student_id=student_id , resets__type = type
+                ).distinct()
+
+                subject_data = get_subject_data(student_id, subjects)
+                reset1_subject_data = get_subject_data(student_id, reset1_subjects)
+
+                for code, reset_data in reset1_subject_data.items():
+                    if code in subject_data and not subject_data[code]['is_pass']:
+                        subject_data[code] = reset_data
+
+                total_credit = sum(item['credit'] for item in subject_data.values())
+                total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+                gpa = get_gpa(total_credit, total_credit_xgp)
+                final_result , created   = FinalResult.objects.update_or_create(student=student,
+                        term_id=term_id,
+                        result_type = type ,
+                        defaults={
+                            'gpa':gpa ,
+                            'total_credit' : total_credit,
+                            "total_credit_xgp":total_credit_xgp
+                        })
+                for sub in reset1_subject_data.values():
+                    FinalSubjectResult.objects.update_or_create(
+                        final_result=final_result,
+                        subject_mapping = sub["subject_mapping"],
+                        defaults={
+                            'external_marks': sub['external_marks'],
+                            'internal_marks': sub['internal_marks'],
+                            'total_marks': sub['total_marks'],
+                            'is_pass': sub['is_pass'],
+                            'grade': sub['grade'],
+                            'grade_point': sub['grade_point'],
+                            'get_credit_xgp': sub['get_credit_xgp'],
+                        }
+                    )
+                    return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
+        elif type == "resit-2":
+            students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type)
+            if not students.exists():
+                return response_handler(message="No students found in the given batch and term", code=400, data={})
+            for student in students:
+                student_id = student.id
+                batch_id = student.batch.id
+                course_id = student.course.id
+                student_specializations = StudentMapping.objects.filter(
+                    student__id=student_id, 
+                    batch_id=batch_id,
+                    term_id=term_id,
+                    course_id=course_id
+                ).values_list("specialization", flat=True)
+                subjects = SubjectMapping.objects.filter(
+                    batch_id=batch_id, term_id=term_id, course__id=course_id,
+                    specialization__id__in=student_specializations, type="main"
+                ).select_related("subject").distinct()
+
+                reset1_subjects = SubjectMapping.objects.filter(
+                    resets__batch_id=batch_id, resets__course_id=course_id,
+                    resets__term_id=term_id, resets__student_id=student_id , resets__type = "resit-1"
+                ).distinct()
+
+                reset2_subjects = SubjectMapping.objects.filter(
+                    resets__batch_id=batch_id, resets__course_id=course_id,
+                    resets__term_id=term_id, resets__student_id=student_id , resets__type = type
+                ).distinct()
+
+                subject_data = get_subject_data(student_id, subjects)
+                reset1_subject_data = get_subject_data(student_id, reset1_subjects)
+                reset2_subject_data = get_subject_data(student_id, reset2_subjects)
+
+                for code, reset_data in reset1_subject_data.items():
+                    if code in subject_data and not subject_data[code]['is_pass']:
+                        subject_data[code] = reset_data
+                for code, reset_data in reset2_subject_data.items():
+                    if code in reset1_subject_data and not reset1_subject_data[code]['is_pass']:
+                        subject_data[code] = reset_data
+
+                total_credit = sum(item['credit'] for item in subject_data.values())
+                total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
+                gpa = get_gpa(total_credit, total_credit_xgp)
+
+                final_result , created   = FinalResult.objects.update_or_create(student=student,
+                        term_id=term_id,
+                        result_type = type ,
+                        defaults={
+                            'gpa':gpa ,
+                            'total_credit' : total_credit,
+                            "total_credit_xgp":total_credit_xgp
+                        })
+                for sub in reset2_subject_data.values():
+                    FinalSubjectResult.objects.update_or_create(
+                        final_result=final_result,
+                        subject_mapping = sub["subject_mapping"],
+                        defaults={
+                            'external_marks': sub['external_marks'],
+                            'internal_marks': sub['internal_marks'],
+                            'total_marks': sub['total_marks'],
+                            'is_pass': sub['is_pass'],
+                            'grade': sub['grade'],
+                            'grade_point': sub['grade_point'],
+                            'get_credit_xgp': sub['get_credit_xgp'],
+                        }
+                    )
+                    return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
+        else:
+            return JsonResponse({"message": f"type {type} name wrong",  "code" :400 ,"data": {} })
+
+
+class StudentFinalResultAPIView(APIView):
+    def get(self, request):
+        enrollment_number = request.data.get('enrollment_number')
+        result_type = request.data.get('type')
+        term_id = request.data.get('term')
+
+        if not enrollment_number or not result_type or not term_id:
+            return response_handler(
+                message="Missing required fields: 'enrollment_number', 'type', or 'term'",
+                code=400,
+                data=None
+            )
+
+        student = Student.objects.filter(enrollment_number=enrollment_number).first()
+        if not student:
+            return response_handler(
+                message="Student not found",
+                code=400,
+                data=None
+            )
+
+        term_wise = FinalResult.objects.filter(student=student.id)
+        final_result = term_wise.filter(result_type=result_type, term=term_id).first()
+
+        if not final_result:
+            return response_handler(
+                message="Final result not found for the specified term and type",
+                code=400,
+                data=None
+            )
+
+        subject_data = FinalSubjectResult.objects.filter(final_result=final_result)
+        subject_serializer_data = FinalSubjectResultSerializer(subject_data, many=True)
+
+        try:
+            cgpa = calculate_cgpa(term_wise)
+        except Exception as e:
+            return response_handler(
+                message=f"Error calculating CGPA: {str(e)}",
+                code=400,
+                data=None
+            )
+
+        return response_handler(
+            message="Result retrieved successfully",
+            code=200,
+            data=subject_serializer_data.data,
+            extra={'gpa': final_result.gpa, 'cgpa': cgpa}
+        )
+
+
+        

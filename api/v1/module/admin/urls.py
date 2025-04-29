@@ -79,7 +79,7 @@ urlpatterns = [
   path('student-profile', StudentProfileAPIView.as_view() , name = "student-profile"),
   path('employee-profile', EmployeeProfileAPIView.as_view() , name = "employee-profile"),
   path('choose-specialization/<int:term_id>', StudentSpecializationAPIView.as_view() , name = "choose-specilaization"),
-  path('student-result', ExamResultGPAAPIView.as_view() , name = "student-result"),
+  path('student-result', StudentFinalResultAPIView.as_view() , name = "student-result"),
   path('resit-component-marks/<int:component_id>' , ResetStudentComponentMarksUpdateAPI.as_view() , name = "resit-component-marks"),
   path('resit-student-gpa/<int:student_id>/<int:batch_id>/<int:course_id>/<int:term_id>', StudentReset1SubjectWiseGPAAPIView.as_view() , name = "resit-student-gpa"),
   path('send-otp', SendOtpAPIView.as_view(), name='send-otp'),
@@ -144,7 +144,8 @@ urlpatterns = [
   path('resit-request-bulk' , ResitrequestBulkAPIView.as_view() , name="resit-request-bulk"),
   path('student-list-filter' , ResitMainStudentListAPIView.as_view() , name="student-list-filter"),
   path('subject-mapping-notes/<int:subject_mapping_id>', SubjectMappingNotesAPI.as_view(), name='subject-mapping-notes'),
-  path('student-fee' , StudentFeeStatusAPIView.as_view() ,name = "student-fee")
+  path('student-fee' , StudentFeeStatusAPIView.as_view() ,name = "student-fee"),
+  path('student-result-save' , StudentFinalSubjectResultSavedAPIView.as_view() ,name = "student-result-save"),
 ]
 
                                                                                                                                                                                          

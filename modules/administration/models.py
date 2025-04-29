@@ -436,6 +436,7 @@ class HallTicketAnnounce(models.Model):
 
 
 
+
 class ExamResultAnnounce(models.Model):
     batch = models.ForeignKey(Batch , on_delete=models.PROTECT , related_name="exam_result")
     term = models.ForeignKey(Terms , on_delete=models.PROTECT , related_name="exam_result")
@@ -448,5 +449,35 @@ class ExamResultAnnounce(models.Model):
 class SubjectMappingNotes(models.Model):
     mapping = models.ForeignKey(SubjectMapping , on_delete= models.PROTECT  , related_name="subject_notes")
     description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+# models.py
+
+class FinalResult(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE , related_name="result")
+    term = models.ForeignKey(Terms, on_delete=models.CASCADE , related_name="result")
+    result_type = models.CharField(max_length=150 , choices=[("main" , "main") , ("resit-1" , "resit-1") , ("resit-2", "resit-2")])
+    gpa = models.FloatField()
+    total_credit = models.FloatField()
+    total_credit_xgp = models.FloatField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('student', 'term', 'result_type')
+
+
+class FinalSubjectResult(models.Model):
+    final_result  = models.ForeignKey(FinalResult, on_delete=models.PROTECT, related_name="final_result")
+    subject_mapping = models.ForeignKey(SubjectMapping, on_delete=models.PROTECT, related_name="final_result")
+    external_marks = models.FloatField()
+    internal_marks = models.FloatField()
+    total_marks = models.FloatField()
+    is_pass = models.BooleanField()
+    grade = models.CharField(max_length=2)
+    grade_point = models.FloatField()
+    get_credit_xgp = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

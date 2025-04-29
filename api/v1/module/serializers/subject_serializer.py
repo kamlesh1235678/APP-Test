@@ -78,3 +78,30 @@ class SubjectMappingNotesListSerializer(serializers.ModelSerializer):
         model = SubjectMappingNotes
         fields = "__all__"
 
+
+class FinalSubjectResultSerializer(serializers.ModelSerializer):
+    subject_name = serializers.SerializerMethodField()
+    subject_code = serializers.SerializerMethodField()
+    credit = serializers.SerializerMethodField()
+    marks_obtained = serializers.SerializerMethodField()
+    grade_obtained = serializers.SerializerMethodField()
+    class Meta:
+        model = FinalSubjectResult
+        fields = ['subject_name', 'subject_code', 'credit', 'marks_obtained' ,'grade_obtained' ]
+
+    def get_subject_name(self, obj):
+        if obj.subject_mapping:
+            return obj.subject_mapping.subject.name
+    def get_subject_code(self, obj):
+        if obj.subject_mapping:
+            return obj.subject_mapping.subject.code
+    def get_credit(self, obj):
+        if obj.subject_mapping:
+            return obj.subject_mapping.subject.credit
+    def get_marks_obtained(self, obj):
+        if obj.total_marks:
+            return obj.total_marks
+    def get_grade_obtained(self, obj):
+        if obj.grade:
+            return obj.grade
+
