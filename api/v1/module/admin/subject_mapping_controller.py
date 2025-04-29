@@ -689,7 +689,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
 
 
 class StudentFinalResultAPIView(APIView):
-    def get(self, request):
+    def post(self, request):
         enrollment_number = request.data.get('enrollment_number')
         result_type = request.data.get('type')
         term_id = request.data.get('term')
