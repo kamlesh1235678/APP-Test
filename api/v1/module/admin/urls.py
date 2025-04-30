@@ -146,6 +146,7 @@ urlpatterns = [
   path('subject-mapping-notes/<int:subject_mapping_id>', SubjectMappingNotesAPI.as_view(), name='subject-mapping-notes'),
   path('student-fee' , StudentFeeStatusAPIView.as_view() ,name = "student-fee"),
   path('student-result-save' , StudentFinalSubjectResultSavedAPIView.as_view() ,name = "student-result-save"),
+  path('subject-mapping-list' , SubjectMappingActiveListAPIView.as_view() ,name = "subject-mapping-list"),
 ]
 
                                                                                                                                                                                          

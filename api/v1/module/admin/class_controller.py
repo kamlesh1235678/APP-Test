@@ -62,7 +62,10 @@ class ClassScheduledModelViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         try:
-            return super().get_queryset()
+            queryset = ClassSchedule.objects.all().order_by('-id')
+            if not self.request.GET:
+                queryset = queryset.filter(mapping__is_active=True)
+            return queryset
         except:
             message = "Class Scheduled lsit fetch successfully"
             return response_handler(message=message, code=400 , data= {})

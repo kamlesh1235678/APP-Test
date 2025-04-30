@@ -372,3 +372,10 @@ class ResitMainStudentListAPIView(APIView):
             return response_handler(message = "Student fetched successfully", data=  StudentMixSerializer(student, many=True).data , code=200)
         else:
             return response_handler(message = "Student fetched successfully" ,data = {} , code = 400)
+
+
+class SubjectMappingActiveListAPIView(APIView):
+    def get(self, request):
+        subject = SubjectMapping.objects.filter(is_active  = True)
+        subject = SubjectMappingListSerializer(subject , many = True)
+        return response_handler(message="subject list fetched successfully" , code = 200 , data = subject.data)
