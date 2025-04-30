@@ -65,7 +65,7 @@ class FacultyMixSerializer(serializers.ModelSerializer):
 class StudentMixSerializer(serializers.ModelSerializer):
     batch = BatchMixSerializer()
     course = CourseMixSerializer()
-    user = UserSerializer()
+    user = UserListSerializer()
     class Meta:
         model = Student
         fields = ['id', 'first_name','middle_name', 'last_name' , 'contact_number', 'gender' ,'enrollment_number' , 'user' , 'batch' , 'course']

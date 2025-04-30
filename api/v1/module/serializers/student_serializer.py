@@ -28,6 +28,12 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'user_type' ,'is_active']
+
+    
 class StudentListSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     batch = BatchSerializer()
