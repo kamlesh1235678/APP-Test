@@ -444,7 +444,7 @@ class StudentComponentAnswer(APIView):
         if type == "main":
             component_student = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
         else:
-            component_student = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , resets__type= type).distinct()
+            component_student = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , resets__type= type , resets__subjects_id = component.subject_mapping.id).distinct()
         students_data = []
         for student in component_student:
             one_student =  StudentMixSerializer(student).data
