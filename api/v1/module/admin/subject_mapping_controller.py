@@ -513,6 +513,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
         if type == "main":
             student_mappings = StudentMapping.objects.filter(batch_id=batch_id,term_id=term_id,course__in = course_id)
             students = Student.objects.filter(student_mappings__in=student_mappings).distinct()
+            
             if not students.exists():
                 return response_handler(message="No students found in the given batch and term", code=400, data={})
             for student in students:
@@ -532,6 +533,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                     specialization__id__in=student_specializations ,
                     type = type,
                 ).select_related("subject").distinct()
+                
 
                 subject_data = get_subject_data(student_id ,subjects)
                 total_credit = sum(item['credit'] for item in subject_data.values())
@@ -546,6 +548,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                             "total_credit_xgp":total_credit_xgp
                         })
                 for sub in subject_data.values():
+                    # import pdb; pdb.set_trace()
                     FinalSubjectResult.objects.update_or_create(
                         final_result=final_result,
                         subject_mapping = sub["subject_mapping"],
@@ -559,7 +562,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                             'get_credit_xgp': sub['get_credit_xgp'],
                         }
                     )
-                    return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
+            return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
         elif type == "resit-1":
             students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type)
             if not students.exists():
@@ -616,7 +619,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                             'get_credit_xgp': sub['get_credit_xgp'],
                         }
                     )
-                    return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
+            return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
         elif type == "resit-2":
             students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type)
             if not students.exists():
@@ -683,7 +686,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                             'get_credit_xgp': sub['get_credit_xgp'],
                         }
                     )
-                    return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
+            return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
         else:
             return JsonResponse({"message": f"type {type} name wrong",  "code" :400 ,"data": {} })
 

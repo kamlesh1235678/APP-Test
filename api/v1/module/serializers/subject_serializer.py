@@ -83,11 +83,16 @@ class FinalSubjectResultSerializer(serializers.ModelSerializer):
     subject_name = serializers.SerializerMethodField()
     subject_code = serializers.SerializerMethodField()
     credit = serializers.SerializerMethodField()
-    marks_obtained = serializers.SerializerMethodField()
-    grade_obtained = serializers.SerializerMethodField()
+    total_marks = serializers.SerializerMethodField()
+    grade = serializers.SerializerMethodField()
+    external_marks = serializers.SerializerMethodField()
+    internal_marks = serializers.SerializerMethodField()
+    grade_point = serializers.SerializerMethodField()
+    get_credit_xgp = serializers.SerializerMethodField()
+    is_pass = serializers.SerializerMethodField()
     class Meta:
         model = FinalSubjectResult
-        fields = ['subject_name', 'subject_code', 'credit', 'marks_obtained' ,'grade_obtained' ]
+        fields = ['subject_name', 'subject_code', 'credit', 'total_marks' ,'grade' 'is_pass' ,'get_credit_xgp' , 'grade_point' ,'internal_marks' , 'external_marks' ]
 
     def get_subject_name(self, obj):
         if obj.subject_mapping:
@@ -98,10 +103,25 @@ class FinalSubjectResultSerializer(serializers.ModelSerializer):
     def get_credit(self, obj):
         if obj.subject_mapping:
             return obj.subject_mapping.subject.credit
-    def get_marks_obtained(self, obj):
+    def get_total_marks(self, obj):
         if obj.total_marks:
             return obj.total_marks
-    def get_grade_obtained(self, obj):
+    def get_external_marks(self, obj):
+        if obj.external_marks:
+            return obj.external_marks
+    def get_internal_marks(self, obj):
+        if obj.internal_marks:
+            return obj.internal_marks
+    def get_grade_point(self, obj):
+        if obj.grade_point:
+            return obj.grade_point
+    def get_grade(self, obj):
         if obj.grade:
             return obj.grade
+    def get_get_credit_xgp(self, obj):
+        if obj.get_credit_xgp:
+            return obj.get_credit_xgp
+    def get_is_pass(self, obj):
+        if obj.is_pass:
+            return obj.is_pass
 
