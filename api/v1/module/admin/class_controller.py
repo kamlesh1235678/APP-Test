@@ -145,8 +145,9 @@ class BulkClassScheduledAPIView(APIView):
             end_time = schedule.get("end_time")
             
             if not all([mapping_id, date, start_time, end_time]):
-                errors.append({"error": "Missing required fields", "data": schedule})
-                continue
+                return response_handler(message="Missing required fields",code=400,data={})
+                # errors.append({"error": "Missing required fields", "data": schedule})
+                # continue
             
             try:
                 class_schedule = ClassSchedule.objects.create(
@@ -162,7 +163,7 @@ class BulkClassScheduledAPIView(APIView):
         return response_handler(
             message="Classes scheduled successfully",
             code=status.HTTP_200_OK,
-            data={"created": created_schedules, "errors": errors}
+            data={}
         )
 
 class ClassAttendanceAPIView(APIView):

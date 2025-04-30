@@ -134,11 +134,14 @@ class ComponentMarksAPIView(APIView):
         student_marks = { mark.student.id : mark.obtained_marks for mark in ComponentMarks.objects.filter(component = component_id)}
         for student in student_serializer.data:
             student['marks'] = student_marks.get(student['id'] , 00)
-            if ComponentAnswers.objects.filter(student=student["id"],component=component_id).exists():
-                
-                student["submitted"] = True
+            if component.is_submission:
+                if ComponentAnswers.objects.filter(student=student["id"],component=component_id).exists():
+                    
+                    student["submitted"] = True
+                else:
+                    student["submitted"]  = False
             else:
-                student["submitted"]  = False
+                student["submitted"] = True
         message = "component student list fetch successfully"
         return response_handler(message=message , code = 200 , data=student_serializer.data , extra={'max_marks':component.max_marks})
     
@@ -187,10 +190,13 @@ class SubComponentMarksAPIView(APIView):
         student_marks = { mark.student.id : mark.obtained_marks for mark in SubComponentMarks.objects.filter(subcomponent = subcomponent_id)}
         for student in student_serializer.data:
             student['marks'] = student_marks.get(student['id'] , 00)
-            if SubComponentAnswers.objects.filter(student=student["id"],sub_component=subcomponent_id).exists():
-                student["submitted"] = True
+            if subcomponent.is_submission:
+                if SubComponentAnswers.objects.filter(student=student["id"],sub_component=subcomponent_id).exists():
+                    student["submitted"] = True
+                else:
+                    student["submitted"]  = False
             else:
-                student["submitted"]  = False
+                student["submitted"] = True
         message = "sub component student list fetch successfully"
         return response_handler(message=message , code = 200 , data=student_serializer.data , extra={'max_marks':subcomponent.max_marks})
     

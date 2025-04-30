@@ -20,5 +20,7 @@ class ClassScheduledListSerializer(serializers.ModelSerializer):
         current_time = now()
         # import pdb; pdb.set_trace()
         return obj.date <= current_time.date() or (obj.date == current_time.date() and obj.start_time <= current_time.time())
+    
+
 
     
