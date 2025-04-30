@@ -210,7 +210,7 @@ def att_percentage(student_id , subject_mapping_id):
     student =  get_object_or_404(Student , id = student_id)
     attended_classes = Attendance.objects.filter(student = student ,  class_schedule__mapping =   mapping_subject , is_persent = True).count()
     complete_classes = mapping_subject.classes_completed
-    attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
+    attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 100
     return attended_percentage
 
 def get_subject_data(student_id ,subject_mappings):
