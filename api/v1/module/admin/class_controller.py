@@ -63,7 +63,7 @@ class ClassScheduledModelViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         try:
             queryset = ClassSchedule.objects.all().order_by('-id')
-            if not self.request.GET:
+            if not self.request.query_params:
                 queryset = queryset.filter(mapping__is_active=True)
             return queryset
         except:
