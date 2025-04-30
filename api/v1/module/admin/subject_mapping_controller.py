@@ -583,6 +583,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                 ).select_related("subject").distinct()
 
                 reset1_subjects = SubjectMapping.objects.filter(
+                    resets__student = student_id,
                     resets__batch_id=batch_id, resets__course_id=course_id,
                     resets__term_id=term_id, resets__student_id=student_id , resets__type = type
                 ).distinct()
@@ -640,11 +641,13 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                 ).select_related("subject").distinct()
 
                 reset1_subjects = SubjectMapping.objects.filter(
+                    resets__student = student_id,
                     resets__batch_id=batch_id, resets__course_id=course_id,
                     resets__term_id=term_id, resets__student_id=student_id , resets__type = "resit-1"
                 ).distinct()
 
                 reset2_subjects = SubjectMapping.objects.filter(
+                    resets__student = student_id,
                     resets__batch_id=batch_id, resets__course_id=course_id,
                     resets__term_id=term_id, resets__student_id=student_id , resets__type = type
                 ).distinct()
