@@ -534,7 +534,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                 ).select_related("subject").distinct()
 
                 subject_data = get_subject_data(student_id ,subjects)
-                total_credit = sum(item['credit'] for item in subject_data.values())
+                total_credit = sum(item['subject_mapping']['subject']['credit'] for item in subject_data.values())
                 total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
                 gpa = get_gpa(total_credit, total_credit_xgp)
                 final_result , created   = FinalResult.objects.update_or_create(student=student,
@@ -591,7 +591,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                     if code in subject_data and not subject_data[code]['is_pass']:
                         subject_data[code] = reset_data
 
-                total_credit = sum(item['credit'] for item in subject_data.values())
+                total_credit = sum(item['subject_mapping']['subject']['credit'] for item in subject_data.values())
                 total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
                 gpa = get_gpa(total_credit, total_credit_xgp)
                 final_result , created   = FinalResult.objects.update_or_create(student=student,
@@ -657,7 +657,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                     if code in reset1_subject_data and not reset1_subject_data[code]['is_pass']:
                         subject_data[code] = reset_data
 
-                total_credit = sum(item['credit'] for item in subject_data.values())
+                total_credit = sum(item['subject_mapping']['subject']['credit'] for item in subject_data.values())
                 total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
                 gpa = get_gpa(total_credit, total_credit_xgp)
 
