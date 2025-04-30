@@ -92,7 +92,7 @@ class FinalSubjectResultSerializer(serializers.ModelSerializer):
     is_pass = serializers.SerializerMethodField()
     class Meta:
         model = FinalSubjectResult
-        fields = ['subject_name', 'subject_code', 'credit', 'total_marks' ,'grade' 'is_pass' ,'get_credit_xgp' , 'grade_point' ,'internal_marks' , 'external_marks' ]
+        fields = ['subject_name', 'subject_code', 'credit', 'total_marks' ,'grade', 'is_pass' ,'get_credit_xgp' , 'grade_point' ,'internal_marks' , 'external_marks' ]
 
     def get_subject_name(self, obj):
         if obj.subject_mapping:
