@@ -260,7 +260,7 @@ def get_subject_data(student_id ,subject_mappings):
             "is_pass": is_pass ,
             "total_marks": total_marks,
             "grade": grade,
-            # "credit": sub_map.subject.credit,
+            "credit": sub_map.subject.credit,
             "grade_point": grade_point,
             "get_credit_xgp": credit_xgp
         }
@@ -504,10 +504,10 @@ class SubjectMappingNotesAPI(APIView):
 
 class StudentFinalSubjectResultSavedAPIView(APIView):
     def post(self, request):
-        batch_id = request.data.get('batch')
-        term_id = request.data.get('term')
-        course_id = request.data.get('course' , []) # courese is a list there 
-        type = request.data.get('type')
+        batch_id = request.query_params.get('batch')
+        term_id = request.query_params.get('term')
+        course_id = request.query_params.getlist('course') # courese is a list there 
+        type = request.query_params.get('type')
         if not batch_id or not term_id or not type:
             return response_handler(message="Missing required parameters", code=400, data={})
         if type == "main":
@@ -534,7 +534,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                 ).select_related("subject").distinct()
 
                 subject_data = get_subject_data(student_id ,subjects)
-                total_credit = sum(item['subject_mapping']['subject']['credit'] for item in subject_data.values())
+                total_credit = sum(item['credit'] for item in subject_data.values())
                 total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
                 gpa = get_gpa(total_credit, total_credit_xgp)
                 final_result , created   = FinalResult.objects.update_or_create(student=student,
@@ -591,7 +591,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                     if code in subject_data and not subject_data[code]['is_pass']:
                         subject_data[code] = reset_data
 
-                total_credit = sum(item['subject_mapping']['subject']['credit'] for item in subject_data.values())
+                total_credit = sum(item['credit'] for item in subject_data.values())
                 total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
                 gpa = get_gpa(total_credit, total_credit_xgp)
                 final_result , created   = FinalResult.objects.update_or_create(student=student,
@@ -657,7 +657,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                     if code in reset1_subject_data and not reset1_subject_data[code]['is_pass']:
                         subject_data[code] = reset_data
 
-                total_credit = sum(item['subject_mapping']['subject']['credit'] for item in subject_data.values())
+                total_credit = sum(item['credit'] for item in subject_data.values())
                 total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
                 gpa = get_gpa(total_credit, total_credit_xgp)
 
@@ -690,9 +690,9 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
 
 class StudentFinalResultAPIView(APIView):
     def post(self, request):
-        enrollment_number = request.data.get('enrollment_number')
-        result_type = request.data.get('type')
-        term_id = request.data.get('term')
+        enrollment_number = request.query_params.get('enrollment_number')
+        result_type = request.query_params.get('type')
+        term_id = request.query_params.get('term')
 
         if not enrollment_number or not result_type or not term_id:
             return response_handler(
