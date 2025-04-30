@@ -326,9 +326,9 @@ class AllEmployeeSingleListAPIView(APIView):
 class ResitSubjectMappingFilterAPIview(APIView):
     def get(self, request):
         type = request.query_params.get('type')
-        batch = request.query_params.get('batch')
-        term = request.query_params.get('term')
-        course = request.query_params.get('course')
+        batch = request.query_params.get('batch_id')
+        term = request.query_params.get('term_id')
+        course = request.query_params.get('course_id')
         filters = Q()
         if type:
             filters &= Q(type=type)
