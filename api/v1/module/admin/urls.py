@@ -147,6 +147,7 @@ urlpatterns = [
   path('student-fee' , StudentFeeStatusAPIView.as_view() ,name = "student-fee"),
   path('student-result-save' , StudentFinalSubjectResultSavedAPIView.as_view() ,name = "student-result-save"),
   path('subject-mapping-list' , SubjectMappingActiveListAPIView.as_view() ,name = "subject-mapping-list"),
+  path('resit-creitria-edit/<int:subject_id>' , ResitExamCreitriaAPIView.as_view() ,name = "resit-creitria-edit"),
 ]
 
                                                                                                                                                                                          

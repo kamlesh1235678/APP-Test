@@ -245,3 +245,31 @@ class ResitrequestBulkAPIView(APIView):
 
         return response_handler(message="Reset requests created successfully" , code = 200 , data= {})
 
+class ResitExamCreitriaAPIView(APIView):
+    def get(self, request , subject_id):
+        subject = get_object_or_404(SubjectMapping , id = subject_id)
+        applicant = ResetExamRequest.objects.filter(batch_id=subject.batch,term_id=subject.term,course__in=subject.course.all() , type= subject.type , subjects = subject.id).distinct()
+        applicant_details = ResetExamRequestListSerializer(applicant , many = True)
+        return response_handler(message="applicant list fetched successfully" , code = 200  , data = applicant_details.data)
+    def post(self, request, subject_id):
+        subject = get_object_or_404(SubjectMapping, id=subject_id)
+        applicant_data = request.data.get('applicant', [])
+
+        for item in applicant_data:
+            student_id = item.get('student_id')
+            criteria_first = item.get('criteria_first', False)
+            criteria_second = item.get('criteria_second', False)
+
+            if not student_id:
+                continue  # skip if student ID is not provided
+
+            ResetExamRequest.objects.update_or_create(
+                student_id=student_id,
+                subject=subject,
+                defaults={
+                    'criteria_first': criteria_first,
+                    'criteria_second': criteria_second
+                }
+            )
+
+        return response_handler(message="Criteria saved successfully", code=200 , data={})

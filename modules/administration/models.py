@@ -295,6 +295,8 @@ class ResetExamRequest(models.Model):
     type = models.CharField(max_length=150  , choices=[("resit-1" , "resit-1") ,("resit-2" , "resit-2")])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    criteria_first = models.BooleanField(default=False)
+    criteria_second = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.student.first_name}-{self.subjects.subject.name}"

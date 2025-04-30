@@ -71,6 +71,8 @@ class StudentFeeStatusAPIView(APIView):
                 }
                 for resit in resits
             ]
+        else:
+            fee_data["resit_subjects"] = []
 
         return response_handler(message="Student fee statuses fetched successfully", code=200, data=fee_data)
 
