@@ -690,9 +690,9 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
 
 class StudentFinalResultAPIView(APIView):
     def post(self, request):
-        enrollment_number = request.query_params.get('enrollment_number')
-        result_type = request.query_params.get('type')
-        term_id = request.query_params.get('term')
+        enrollment_number = request.data.get('enrollment_number')
+        result_type = request.data.get('type')
+        term_id = request.data.get('term')
 
         if not enrollment_number or not result_type or not term_id:
             return response_handler(
