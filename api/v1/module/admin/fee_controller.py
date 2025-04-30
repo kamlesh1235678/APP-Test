@@ -32,6 +32,9 @@ class StudentFeeStatusAPIView(APIView):
             fee_status = StudentFeeStatus.objects.get(student=student)
             fee_data = {
                 "student_id": student.id,
+                "name": f"{student.first_name} {student.middle_name} {student.last_name}",
+                "email": student.user.email,
+                "mobile": student.contact_number,
                 "enrollment_number": student.enrollment_number,
                 "batch": student.batch.name,
                 "course": student.course.name,
@@ -44,6 +47,9 @@ class StudentFeeStatusAPIView(APIView):
         except StudentFeeStatus.DoesNotExist:
             fee_data = {
                 "student_id": student.id,
+                "name": f"{student.first_name} {student.middle_name} {student.last_name}",
+                "email": student.user.email,
+                "mobile": student.contact_number,
                 "enrollment_number": student.enrollment_number,
                 "batch": student.batch.name,
                 "course": student.course.name,

@@ -565,6 +565,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
             return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
         elif type == "resit-1":
             students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type)
+            
             if not students.exists():
                 return response_handler(message="No students found in the given batch and term", code=400, data={})
             for student in students:
@@ -590,11 +591,11 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
 
                 subject_data = get_subject_data(student_id, subjects)
                 reset1_subject_data = get_subject_data(student_id, reset1_subjects)
-
+                
                 for code, reset_data in reset1_subject_data.items():
                     if code in subject_data and not subject_data[code]['is_pass']:
                         subject_data[code] = reset_data
-
+                # import pdb; pdb.set_trace()
                 total_credit = sum(item['credit'] for item in subject_data.values())
                 total_credit_xgp = sum(item['get_credit_xgp'] for item in subject_data.values())
                 gpa = get_gpa(total_credit, total_credit_xgp)
