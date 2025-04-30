@@ -141,7 +141,7 @@ def get_external_marks(student_id  , subject_mapping ):
     ).aggregate(total_marks=Sum("obtained_marks"))["total_marks"] or 0  # Default to 0 if None
     max_external = Component.objects.filter(subject_mapping =subject_mapping , type = "EXTERNAL").aggregate(max_marks = Sum("max_marks"))['max_marks'] or 0
     # import pdb; pdb.set_trace()
-    external_marks  = (external_marks/max_external)* subject_mapping.weightage_external
+    external_marks  = ((external_marks/max_external)* subject_mapping.weightage_external) if max_external != 0 else 0
     return external_marks
 
 def get_internal_marks(student_id  , subject_mapping ):
@@ -151,7 +151,7 @@ def get_internal_marks(student_id  , subject_mapping ):
         component__type="INTERNAL"
     ).aggregate(total_marks=Sum("obtained_marks"))["total_marks"] or 0  # Default to 0 if None
     max_internal = Component.objects.filter(subject_mapping =subject_mapping , type = "INTERNAL").aggregate(max_marks = Sum("max_marks"))['max_marks'] or 0
-    internal_marks  = (internal_marks/max_internal) * subject_mapping.weightage_internal
+    internal_marks  = ((internal_marks/max_internal) * subject_mapping.weightage_internal) if max_internal != 0 else 0
     return internal_marks
 
 def get_passed(external_marks , internal_marks ,subject_mapping ):
@@ -716,7 +716,7 @@ class StudentFinalResultAPIView(APIView):
             return response_handler(
                 message="Final result not found for the specified term and type",
                 code=400,
-                data=None
+                data={}
             )
 
         subject_data = FinalSubjectResult.objects.filter(final_result=final_result)
