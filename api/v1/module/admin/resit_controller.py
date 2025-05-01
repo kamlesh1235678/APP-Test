@@ -43,6 +43,11 @@ class ResetExamRequestModelViewSet(viewsets.ModelViewSet):
     pagination_class = ResetExamRequestPagination
     http_method_names = ['get' , 'post' , 'delete' , 'put']
 
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return ResetExamRequestListtSerializer
+        return ResetExamRequestSerializer
+
     def get_queryset(self):
         try:
             return super().get_queryset()
