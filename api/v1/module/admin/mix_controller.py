@@ -159,9 +159,13 @@ def get_current_terms():
 class FAcultyFilterAPIView(APIView):
     def get(self, request):
         faculty = request.query_params.get('faculty')
+        type = request.query_params.get('type')
         filters = Q()
         if faculty:
             filters &= Q(faculty_id=faculty , is_active =True) # there is active for current subject
+
+        if type:  # Optional: only exclude 'main' when explicitly asked
+            filters &= ~Q(type='main')
         
         subject_assign = SubjectMapping.objects.filter(filters).distinct().order_by('-id')
 
