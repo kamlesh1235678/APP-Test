@@ -10,6 +10,7 @@ from modules.users.models import *
 from api.v1.module.serializers.student_serializer import *
 from api.v1.module.admin.subject_mapping_controller import *
 import math
+from django.core.exceptions import ObjectDoesNotExist
 
 class ResetExamRequestPagination(PageNumberPagination):
     page_size = 10 
@@ -251,8 +252,12 @@ class ResitExamCreitriaAPIView(APIView):
         applicant = ResetExamRequest.objects.filter(batch_id=subject.batch,term_id=subject.term,course__in=subject.course.all() , type= subject.type , subjects = subject.id).distinct()
         applicant_details = ResetExamRequestListSerializer(applicant , many = True)
         return response_handler(message="applicant list fetched successfully" , code = 200  , data = applicant_details.data)
+    
     def post(self, request, subject_id):
-        subject = get_object_or_404(SubjectMapping, id=subject_id)
+        try:
+            subject = get_object_or_404(SubjectMapping, id=subject_id)
+        except ObjectDoesNotExist:
+            return response_handler(message="Subject not found", code=404, data={})
         applicant_data = request.data.get('applicant', [])
 
         for item in applicant_data:
@@ -265,7 +270,7 @@ class ResitExamCreitriaAPIView(APIView):
 
             ResetExamRequest.objects.update_or_create(
                 student_id=student_id,
-                subject=subject,
+                subjects=subject,
                 defaults={
                     'criteria_first': criteria_first,
                     'criteria_second': criteria_second
