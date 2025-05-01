@@ -197,12 +197,20 @@ def get_gpa(total_credit,total_credit_xgp ):
     except:
         return 0
     
-def calculate_cgpa(term_wise):
+def calculate_cgpa(term_wise , result_type , term_id):
+    result_term = get_object_or_404(Terms , id = term_id).name
     terms = term_wise.values_list('term', flat=True).distinct()
     total_gpa = 0
     for term in terms:
-        gpa = term_wise.filter(term=term).last().gpa
-        total_gpa += gpa
+        term = get_object_or_404(Terms, id = term)
+        term_name = term.name[-1:]
+        if result_term[-1:] >= term_name:
+            if result_term[-1:] == term_name:
+                gpa = term_wise.filter(term=term , result_type=result_type).first().gpa
+                total_gpa += gpa
+            else:
+                gpa = term_wise.filter(term=term).last().gpa
+                total_gpa += gpa
     return round(total_gpa / len(terms), 2)
     
 def att_percentage(student_id , subject_mapping_id):
@@ -730,7 +738,7 @@ class StudentFinalResultAPIView(APIView):
         subject_serializer_data = FinalSubjectResultSerializer(subject_data, many=True)
 
         try:
-            cgpa = calculate_cgpa(term_wise)
+            cgpa = calculate_cgpa(term_wise , result_type , term_id)
         except Exception as e:
             return response_handler(
                 message=f"Error calculating CGPA: {str(e)}",
