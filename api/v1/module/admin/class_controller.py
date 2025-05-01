@@ -373,7 +373,7 @@ class AttendanceSummaryFilter(APIView):
             filters &= Q(term=term)
         subject_mappings = subject_mappings.filter(filters)
         if not subject_mappings.filter(filters).exists():
-            return response_handler(message="this subject still not assign you" , code = 200  , data = {})
+            return response_handler(message="this subject still not assign you" , code = 200  , data = [])
         # import pdb; pdb.set_trace()
         
         # Date parsing
