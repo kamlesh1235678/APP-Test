@@ -201,8 +201,8 @@ def calculate_cgpa(term_wise):
     terms = term_wise.values_list('term', flat=True).distinct()
     total_gpa = 0
     for term in terms:
-        gpa = term_wise.filter(term = term ).last().gpa
-        total_gpa =+ gpa
+        gpa = term_wise.filter(term=term).last().gpa
+        total_gpa += gpa
     return round(total_gpa / len(terms), 2)
     
 def att_percentage(student_id , subject_mapping_id):
