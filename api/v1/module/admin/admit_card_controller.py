@@ -67,8 +67,8 @@ class HallTicketWise(APIView):
     def get(self, request , student_id , term_id , type):
         student = get_object_or_404(Student , id = student_id)
         term =  get_object_or_404(Terms , id = term_id)
+        student_mapping = StudentMapping.objects.filter(student = student)
         if type =="main":
-            student_mapping = StudentMapping.objects.filter(student = student)
             subject_mapping = SubjectMapping.objects.filter(
                 batch = student.batch,
                 course = student.course,
