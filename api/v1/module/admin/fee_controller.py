@@ -26,7 +26,7 @@ class StudentFeeStatusAPIView(APIView):
         student = Student.objects.filter(filters).select_related('batch', 'course').first()
 
         if not student:
-            return response_handler(message="Student not found", code=404, data={})
+            return response_handler(message="Student not found", code=400, data={})
 
         try:
             fee_status = StudentFeeStatus.objects.get(student=student)

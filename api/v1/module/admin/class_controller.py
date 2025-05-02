@@ -246,13 +246,17 @@ class SubjectAttendanceListAPIView(APIView):
     def get(self, request , subject_mapping_id):
         mapping_subject =  get_object_or_404(SubjectMapping , id = subject_mapping_id)
         attendance = Attendance.objects.filter( class_schedule__mapping =   mapping_subject)
-        students = Student.objects.filter(course__in = mapping_subject.course.all() , batch = mapping_subject.batch , student_mappings__term = mapping_subject.term , student_mappings__specialization__in = mapping_subject.specialization.all() ).distinct()
-        students_serializer = StudentSerializer(students , many = True)
+        students = Student.objects.filter(student_mappings__course__in = mapping_subject.course.all() , student_mappings__batch = mapping_subject.batch , student_mappings__term = mapping_subject.term , student_mappings__specialization__in = mapping_subject.specialization.all() ).distinct()
+        students_serializer = StudentAttendanceSerializer(students , many = True)
         complete_classes = mapping_subject.classes_completed
         for student in students_serializer.data:
             attended_classes  = attendance.filter(student = student['id'] , is_persent = True).count()
             attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
             student['attendance_percentage'] = attended_percentage
+            student['total_classes'] = mapping_subject.total_classes
+            student['complete_classes'] = complete_classes
+            student['attended_classes'] = attended_classes
+            student['absent_classes'] = complete_classes - attended_classes
 
         message = "Student List fetched successfully"
         return response_handler(message= message , code = 200 , data=students_serializer.data)
@@ -596,3 +600,21 @@ class UpComeingSubjectMappingClassAPIView(APIView):
     
 
 
+# new one 
+class LastCompletedClassWithAttendanceAPIView(APIView):
+
+    def get(self, request, subject_id):
+        # Get the last completed class for the subject
+        last_class = ClassSchedule.objects.filter(mapping=subject_id, is_completed=True).order_by('-date')
+        if last_class.exists():
+            return response_handler(message="No completed class found for the subject", code=400 , data = {})
+
+        # Get all attendance records for that class
+        attendances = Attendance.objects.filter(class_schedule=last_class).select_related('student')
+        attendance_data = AttendanceSerializer(attendances, many=True).data
+
+        data = {
+            "class_schedule": ClassScheduledListSerializer(last_class).data,
+            "attendances": attendance_data
+        }
+        return response_handler(message="Last completed class with student attendance", code=200, data=data)
