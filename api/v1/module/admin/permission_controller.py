@@ -81,18 +81,24 @@ class PermissionModelViewSet(viewsets.ModelViewSet):
 class RolePermissionAPIView(APIView):
     def get(self, request , role_id):
         role = get_object_or_404(Role , id = role_id)
-        permissions = Permission.objects.all().order_by('-id')
+        excluded_content_type_ids = [1, 2, 3, 4, 5, 6, 10, 13, 41, 42, 43, 44, 45, 47]
+        permissions = Permission.objects.exclude(content_type_id__in=excluded_content_type_ids).order_by('-id')
         permission_serializers = PermissionSerializer(permissions , many = True).data
         role_permission = role.role_permissions.all().first().permission.all().values_list('id', flat=True)
+        grouped_permissions = {}
+
         for permission_serializer in permission_serializers:
-            # import pdb; pdb.set_trace()
-            if permission_serializer['id'] in role_permission:
-                permission_serializer['has_permission'] = True
-            else:
-                permission_serializer['has_permission'] = False
+            # Check if the permission is associated with the role
+            permission_serializer['has_permission'] = permission_serializer['id'] in role_permission
+            content_type_name = permission_serializer['content_type']
+            # Group permissions by content type name
+            if content_type_name not in grouped_permissions:
+                grouped_permissions[content_type_name] = []
+            grouped_permissions[content_type_name].append(permission_serializer)
         data = {
-            'permission': permission_serializers,
+            'permission': grouped_permissions,
         }
+        # import pdb ; pdb.set_trace()
         message = "Permission fetched successfully"
         return response_handler(message =message , code = 200 , data = data)
     def post(self,request , role_id):

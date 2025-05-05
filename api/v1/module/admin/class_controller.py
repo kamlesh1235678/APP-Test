@@ -259,7 +259,7 @@ class SubjectAttendanceListAPIView(APIView):
             student['absent_classes'] = complete_classes - attended_classes
 
         message = "Student List fetched successfully"
-        return response_handler(message= message , code = 200 , data=students_serializer.data)
+        return response_handler(message= message , code = 200 , data=students_serializer.data , extra={'subject_name':mapping_subject.subject.name})
 
 
 
