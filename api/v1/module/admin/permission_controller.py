@@ -99,7 +99,7 @@ class RolePermissionAPIView(APIView):
         role = get_object_or_404(Role , id = role_id)
         requestd_permission =   request.data.get('permission' , [])
         if not requestd_permission:
-            return response_handler(message=message , code = 400 , data= {})
+            return response_handler(message="Please Send At list one Permission" , code = 400 , data= {})
         permission = Permission.objects.filter(id__in = requestd_permission )
         # import pdb; pdb.set_trace()
         role_permission_obj ,create  = RolePermission.objects.update_or_create(role = role,

@@ -55,6 +55,7 @@ class LoginSerializer(serializers.ModelSerializer):
         elif hasattr(obj, 'employee'):
             return f"{obj.employee.first_name} {obj.employee.last_name}"
         return None
+    
     def get_permission_list(self, obj):
         """Get role ID dynamically from related Student or Employee"""
         if hasattr(obj, 'student'):
