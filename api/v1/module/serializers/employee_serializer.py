@@ -60,3 +60,22 @@ class FacultyMentorshipListSerializer(serializers.ModelSerializer):
     class Meta:
         model = FacultyMentorship
         fields = "__all__"
+
+
+class RoleAssignmentSerializer(serializers.ModelSerializer):
+    assigned = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Role
+        fields = ['id', 'name', 'assigned']
+
+    def get_assigned(self, role):
+        employee = self.context.get('employee')
+        if employee:
+            return role in employee.employee_role.all()
+        return False
+    
+class RoleUpdateSerializer(serializers.Serializer):
+    role_ids = serializers.ListField(
+        child=serializers.IntegerField(), allow_empty=True
+    )

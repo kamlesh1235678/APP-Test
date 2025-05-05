@@ -88,17 +88,14 @@ class RolePermissionAPIView(APIView):
         grouped_permissions = {}
 
         for permission_serializer in permission_serializers:
-            # Check if the permission is associated with the role
             permission_serializer['has_permission'] = permission_serializer['id'] in role_permission
             content_type_name = permission_serializer['content_type']
-            # Group permissions by content type name
             if content_type_name not in grouped_permissions:
                 grouped_permissions[content_type_name] = []
             grouped_permissions[content_type_name].append(permission_serializer)
         data = {
             'permission': grouped_permissions,
         }
-        # import pdb ; pdb.set_trace()
         message = "Permission fetched successfully"
         return response_handler(message =message , code = 200 , data = data)
     def post(self,request , role_id):

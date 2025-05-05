@@ -320,3 +320,29 @@ class UploadEmployeeExcel(APIView):
 
 
 
+class EmployeeRoleListAPIView(APIView):
+    def get(self, request, employee_id):
+        try:
+            employee = Employee.objects.get(id=employee_id)
+        except Employee.DoesNotExist:
+            return response_handler(message= "Employee not found"  , code = 400 , data = {})
+
+        roles = Role.objects.all()
+        serializer = RoleAssignmentSerializer(roles, many=True, context={'employee': employee})
+        return response_handler(message= "Employee Role List"  , code = 200 , data = serializer.data)
+    
+    def put(self, request, employee_id):
+        try:
+            employee = Employee.objects.get(id=employee_id)
+        except Employee.DoesNotExist:
+            return response_handler(message= "Employee not found"  , code = 400 , data = {})
+
+        serializer = RoleUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            role_ids = serializer.validated_data['role_ids']
+            roles = Role.objects.filter(id__in=role_ids)
+
+            # Replace all roles with the new ones
+            employee.employee_role.set(roles)
+            return Response({"message": "Roles updated successfully"})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
