@@ -329,7 +329,7 @@ class EmployeeRoleListAPIView(APIView):
 
         roles = Role.objects.all()
         serializer = RoleAssignmentSerializer(roles, many=True, context={'employee': employee})
-        return response_handler(message= "Employee Role List"  , code = 200 , data = serializer.data)
+        return response_handler(message= "Employee Role List"  , code = 200 , data = serializer.data , extra={'employee_name':f"{employee.first_name}{employee.last_name}"})
     
     def put(self, request, employee_id):
         try:
