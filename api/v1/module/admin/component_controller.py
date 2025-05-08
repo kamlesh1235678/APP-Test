@@ -550,5 +550,57 @@ class StudentSubComponentAnswerDetails(APIView):
 
 
 
+class SubjectWiseComponentMarksAPIView(APIView):
+    def get(self, request, subject_id):
+        components = Component.objects.filter(subject_mapping=subject_id).order_by('-id')
+        if not components.exists():
+            return response_handler(message="No components found", code=404, data={})
 
+        subject_mapping = components.first().subject_mapping
+        course = subject_mapping.course.all()
+        batch = subject_mapping.batch
+        term = subject_mapping.term
+        specialization = subject_mapping.specialization.all()
+        type = subject_mapping.type
 
+        if type == "main":
+            students = Student.objects.filter(
+                student_mappings__course__in=course,
+                student_mappings__batch=batch,
+                student_mappings__term=term,
+                student_mappings__specialization__in=specialization
+            ).distinct()
+        else:
+            students = Student.objects.filter(
+                resets__batch=batch,
+                resets__term=term,
+                resets__course__in=course,
+                resets__type=type,
+                resets__subjects=subject_mapping.id
+            ).distinct()
+
+        student_serializer = StudentAttendanceSerializer(students, many=True)
+        student_data = {s['id']: s for s in student_serializer.data}
+
+        # Initialize marks dictionary for each student
+        for student in student_data.values():
+            student['component_marks'] = []
+
+        # For each component, assign marks to students
+        for component in components:
+            marks = ComponentMarks.objects.filter(component=component)
+            mark_map = {m.student.id: m.obtained_marks for m in marks}
+
+            for student_id, student in student_data.items():
+                student['component_marks'].append({
+                    'component_id': component.id,
+                    'component_name': component.name,
+                    'obtained_marks': mark_map.get(student_id, 0),
+                    'max_marks': component.max_marks,
+                })
+
+        return response_handler(
+            message="Component marks fetched successfully",
+            code=200,
+            data=list(student_data.values())
+        )
