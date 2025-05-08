@@ -3,6 +3,16 @@ from api.v1.module.serializers.student_serializer import UserSerializer
 from modules.users.models import User , AuditLog  
 from django.contrib.auth.models import Permission
 from modules.privacy.models import RolePermission
+import hashlib
+import pandas as pd
+
+
+def save_hashed_permissions_to_excel(hashed_map, filename='permission_hashes.xlsx'):
+    df = pd.DataFrame([
+        {"Hashed Code": key, "Codename": value}
+        for key, value in hashed_map.items()
+    ])
+    df.to_excel(filename, index=False)
 
 class LoginSerializer(serializers.ModelSerializer):
     role_name = serializers.SerializerMethodField()
@@ -57,18 +67,28 @@ class LoginSerializer(serializers.ModelSerializer):
         return None
     
     def get_permission_list(self, obj):
-        """Get role ID dynamically from related Student or Employee"""
+        permissions = []
+
         if hasattr(obj, 'student'):
             role = obj.student.student_role
-            role = role.role_permissions.all().first()
-            permissions = list(role.permission.all().values_list('codename', flat=True))
-            return permissions
+            if role:
+                role_permissions = role.role_permissions.all().first()
+                if role_permissions:
+                    permissions = role_permissions.permission.all().values_list('codename', flat=True)
+
         elif hasattr(obj, 'employee'):
-            role = obj.employee.employee_role.all()
-            permissions_qs =Permission.objects.filter(role_permissions__role__in=role).values_list('codename', flat=True).distinct()
-            permissions = list(permissions_qs)
-            return permissions
-        return []
+            roles = obj.employee.employee_role.all()
+            permissions = Permission.objects.filter(
+                role_permissions__role__in=roles
+            ).values_list('codename', flat=True).distinct()
+
+        # Hash permissions
+        hashed_map = {
+            hashlib.sha256(code.encode()).hexdigest(): code
+            for code in permissions
+        }
+        hashed_list = list(hashed_map.keys())
+        return hashed_list
 
 
     
