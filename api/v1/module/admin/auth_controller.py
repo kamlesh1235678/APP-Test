@@ -33,7 +33,7 @@ class LoginAPIView(ObtainAuthToken):
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
             update_last_login(None, user)
-            return response_handler(message = "Login successfully done" , code = 200 , data = {'access_token': access_token,'refresh_token':refresh_token,
+            return response_handler(message = "Login successfully done" , code = 200 , data = {'access_token': access_token,'refresh_token':refresh_token,'permission_list' :LoginSerializer(user).data['permission_list'] , 
                 'user': LoginSerializer(user).data,})
         else:
             return response_handler(message = "Invalid username or password." , code = 400 , data = {})

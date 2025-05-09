@@ -83,8 +83,8 @@ class LoginSerializer(serializers.ModelSerializer):
             ).values_list('codename', flat=True).distinct()
 
         # Hash permissions
-        hashed_map = {
-            hashlib.sha256(code.encode()).hexdigest(): code
+        hashed_map = { 
+            hashlib.sha256(code.encode()).hexdigest(): code   # codename hashed in sha256 with 16 digit
             for code in permissions
         }
         hashed_list = list(hashed_map.keys())
