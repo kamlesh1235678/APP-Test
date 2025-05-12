@@ -23,7 +23,7 @@ class MyFilterSet(filters.FilterSet):
 
 
 class SubjectMappingPagination(PageNumberPagination):
-    page_size = 10 
+    page_size = 20
     def get_paginated_response(self, data):
         total_items = self.page.paginator.count
         if not total_items:

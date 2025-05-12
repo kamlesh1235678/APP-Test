@@ -39,6 +39,7 @@ import django_filters
 class ClassFilter(django_filters.FilterSet):
     s_date = django_filters.DateFilter(field_name='date', lookup_expr='gte')
     e_date = django_filters.DateFilter(field_name='date', lookup_expr='lte')
+    mapping = django_filters.ModelChoiceFilter(field_name='mapping__subject',queryset=Subject.objects.all())
 
     class Meta:
         model = ClassSchedule

@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Sum
 
 class SubjectPagination(PageNumberPagination):
-    page_size = 10 
+    page_size = 50 
     def get_paginated_response(self, data):
         total_items = self.page.paginator.count
         if not total_items:
