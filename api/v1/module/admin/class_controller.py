@@ -253,6 +253,7 @@ class SubjectAttendanceListAPIView(APIView):
         for student in students_serializer.data:
             attended_classes  = attendance.filter(student = student['id'] , is_persent = True).count()
             attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
+            attended_percentage = round(attended_percentage, 2)
             student['attendance_percentage'] = attended_percentage
             student['total_classes'] = mapping_subject.total_classes
             student['complete_classes'] = complete_classes
@@ -312,6 +313,7 @@ class AttendanceSummary(APIView):
             attended_classes  = Attendance.objects.filter(class_schedule__mapping =   subject_mapping , student = student.id , is_persent = True).count()
             complete_classes = subject_mapping.classes_completed
             attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
+            attended_percentage = round(attended_percentage, 2)
             subject_attendance = []
             for i in range(days):
                 current_date = today - timedelta(days=i)
@@ -419,6 +421,7 @@ class AttendanceSummaryFilter(APIView):
             attended_classes  = Attendance.objects.filter(class_schedule__mapping =   subject_mapping , student = student.id , is_persent = True).count()
             complete_classes = subject_mapping.classes_completed
             attended_percentage = (attended_classes /complete_classes)*100 if complete_classes > 0 else 0
+            attended_percentage = round(attended_percentage, 2)
             subject_attendance = []
             days = (e_date - s_date).days + 1  # Calculate total days in the range
 
