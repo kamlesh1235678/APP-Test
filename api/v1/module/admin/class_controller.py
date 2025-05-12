@@ -232,6 +232,11 @@ class ClassAttendanceAPIView(APIView):
         if not is_valid:
             return response_handler(message="Some students do not belong to this class." , code = 400 , data= {})
         attendance_records = []
+        class_schedule.is_complete = True
+        try:
+            class_schedule.save()
+        except Exception as e:
+            return response_handler(message="some error when mark attendance." , code = 400 , data= ClassScheduledListSerializer(class_schedule).data , extra={"error" : class_schedule.check_conflicts()})
         for student in students:
             student_info = student_class_info_dict.get(student.id, {})
             # import pdb; pdb.set_trace()
@@ -251,8 +256,6 @@ class ClassAttendanceAPIView(APIView):
                 "ce_marks":ce_marks
             })
 
-        class_schedule.is_complete = True
-        class_schedule.save()
 
         return response_handler(message = "Attendance Mark successfully"  , code = 200 , data = attendance_records)
     
