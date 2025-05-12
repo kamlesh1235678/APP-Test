@@ -135,16 +135,14 @@ class ClassScheduledModelViewSet(viewsets.ModelViewSet):
             message = "Class canceled successfully"
         return response_handler(message= message , code = 200 , data = {})
         
+
 class BulkClassScheduledAPIView(APIView):
     def post(self, request):
         schedules_data = request.data.get("schedules", [])
-        
         if not schedules_data:
-            return response_handler("No schedules provided", status.HTTP_400_BAD_REQUEST, {})
-        
+            return response_handler( message= "No schedules provided", code = 200 , data= {})
         created_schedules = []
         errors = []
-        
         for schedule in schedules_data:
             mapping_id = schedule.get("mapping")
             date = schedule.get("date")
@@ -153,10 +151,25 @@ class BulkClassScheduledAPIView(APIView):
             
             if not all([mapping_id, date, start_time, end_time]):
                 return response_handler(message="Missing required fields",code=400,data={})
-                # errors.append({"error": "Missing required fields", "data": schedule})
-                # continue
             
             try:
+                # Create but don't save yet
+                class_schedule = ClassSchedule(
+                    mapping_id=mapping_id,
+                    date=parse_date(date),
+                    start_time=parse_time(start_time),
+                    end_time=parse_time(end_time)
+                )
+                # Manually check for conflicts before saving
+                conflict_errors = class_schedule.check_conflicts()
+                if conflict_errors:
+                    errors.append({
+                        "error": conflict_errors,
+                        "data": schedule
+                    })
+                    continue
+                class_schedule.save()
+                created_schedules.append(ClassScheduledSerializer(class_schedule).data)
                 class_schedule = ClassSchedule.objects.create(
                     mapping_id=mapping_id,
                     date=parse_date(date),
