@@ -518,6 +518,12 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
         type = request.query_params.get('type')
         if not batch_id or not term_id or not type:
             return response_handler(message="Missing required parameters", code=400, data={})
+        obj, created = ExamResultAnnounce.objects.update_or_create(
+                batch = batch_id , term = term_id , type = type ,
+                defaults={
+                    'is_active': True  
+                }
+            )
         if type == "main":
             student_mappings = StudentMapping.objects.filter(batch_id=batch_id,term_id=term_id,course__in = course_id)
             students = Student.objects.filter(student_mappings__in=student_mappings).distinct()
