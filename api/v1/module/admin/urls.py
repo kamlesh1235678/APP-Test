@@ -150,6 +150,7 @@ urlpatterns = [
   path('resit-creitria-edit/<int:subject_id>' , ResitExamCreitriaAPIView.as_view() ,name = "resit-creitria-edit"),
   path('employee-role-edit/<int:employee_id>' , EmployeeRoleListAPIView.as_view() ,name = "employee-role-edit"),
   path('subject-wise-component-marks/<int:subject_id>' , SubjectWiseComponentMarksAPIView.as_view() ,name = "subject-wise-component-marks"),
+  path('student-mapping-edit/<int:student_mapping_id>' , StudentMappingEditAPIView.as_view() ,name = "student-mapping-edit"),
 ]
 
                                                                                                                                                                                          

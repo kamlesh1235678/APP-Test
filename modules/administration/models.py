@@ -114,7 +114,8 @@ class StudentMapping(models.Model):
     batch = models.ForeignKey(Batch, on_delete=models.PROTECT, related_name="student_mappings" , null=True , blank=True)
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name="student_mappings" , null=True , blank=True)
 
-
+    class Meta:
+        unique_together = ("batch", "course", "term" , "specialization")
 
 
 
@@ -257,6 +258,11 @@ class Exam(models.Model):
 
     def __str__(self):
         return f"{self.component.subject_mapping}  - {self.date}"
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['component'], name='unique_exam_component')
+        ]
 
 
 class ComponentMarks(models.Model):

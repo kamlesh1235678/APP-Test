@@ -22,7 +22,7 @@ class ResetExamRequestListtSerializer(serializers.ModelSerializer):
     subjects = serializers.SerializerMethodField()
     class Meta:
         model = ResetExamRequest
-        fields =  ['student' , 'type' , 'batch' ,'course' , 'term' , 'subjects' , 'status'  'criteria_first','criteria_second']
+        fields =  ['student' , 'type' , 'batch' ,'course' , 'term' , 'subjects' , 'status' , 'criteria_first','criteria_second']
 
     def get_student(self, obj):
         if obj.student:

@@ -156,3 +156,43 @@ class StudentMappingFilter(APIView):
         student_mapping =  StudentMappingFiterSerializer(student_mapping , many = True)
         return response_handler(message='filtered student mapping list fetched successfully' , code= 200 , data=student_mapping.data)
 
+
+
+
+class StudentMappingEditAPIView(APIView):
+    def get(self, request , student_mapping_id):
+        student_mapping = get_object_or_404(StudentMapping , id = student_mapping_id)
+        course_id = student_mapping.course
+        batch_id = student_mapping.batch
+        # Fetch students of this course & batch
+        students = Student.objects.filter(course_id=course_id, batch_id=batch_id ,dropped = False , is_archived = False).order_by('-id')
+
+        mapped_students = set(student_mapping.student.values_list('id', flat=True))
+
+        # Serialize with 'checked' field
+        serialized_students = []
+        for student in students:
+            data = StudentMixSerializer(student).data
+            data['checked'] = student.id in mapped_students
+            serialized_students.append(data)
+        return response_handler(message = "Student list with mapping status fetched successfully" ,code = 200 , data=serialized_students )
+        
+    
+    def post(self, request, student_mapping_id):
+        student_mapping = get_object_or_404(StudentMapping, id=student_mapping_id)
+        student_ids = request.data.get("student_ids", [])
+
+        if not isinstance(student_ids, list):
+            return response_handler(message="student_ids must be a list of student IDs" , code = 400 , data={})
+        # Validate all student IDs belong to the correct batch & course
+        valid_students = Student.objects.filter(
+            id__in=student_ids,
+            course_id=student_mapping.course_id,
+            batch_id=student_mapping.batch_id,
+            dropped=False,
+            is_archived=False
+        )
+        # Update mapping
+        student_mapping.student.set(valid_students)
+        student_mapping.save()
+        return response_handler(message="Student mapping updated successfully" , code = 200 , data = {})
