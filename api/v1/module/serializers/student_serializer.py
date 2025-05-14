@@ -111,28 +111,27 @@ class StudentMappingListSerializer(serializers.ModelSerializer):
         model = StudentMapping
         fields = "__all__"
 
-
 class StudentMappingLListSerializer(serializers.ModelSerializer):
     term = serializers.SerializerMethodField()
     batch = serializers.SerializerMethodField()
     course = serializers.SerializerMethodField()
     specialization = serializers.SerializerMethodField()
+
     class Meta:
         model = StudentMapping
         fields = ["id", "batch", "term", "course", "specialization"]
 
     def get_batch(self, obj):
-        if obj:
-            return obj.batch.name
+        return obj.batch.name if obj and obj.batch else None
+
     def get_course(self, obj):
-        if obj:
-            return self.obj.course.name
+        return obj.course.name if obj and obj.course else None
+
     def get_term(self, obj):
-        if obj:
-            return obj.term.name
+        return obj.term.name if obj and obj.term else None
+
     def get_specialization(self, obj):
-        if obj:
-            return obj.specialization.name
+        return obj.specialization.name if obj and obj.specialization else None
 
 class StudentSpecilaizationSerializer(serializers.ModelSerializer):
     is_exist = serializers.SerializerMethodField() 
