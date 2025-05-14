@@ -34,7 +34,7 @@ class StudentMappingModelViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method == "GET":
-            return StudentMappingListSerializer
+            return StudentMappingLListSerializer
         return StudentMappingSerializer
     def get_queryset(self):
         try:
