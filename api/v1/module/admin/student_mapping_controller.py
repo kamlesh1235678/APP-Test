@@ -175,7 +175,7 @@ class StudentMappingEditAPIView(APIView):
             data = StudentMixSerializer(student).data
             data['checked'] = student.id in mapped_students
             serialized_students.append(data)
-        return response_handler(message = "Student list with mapping status fetched successfully" ,code = 200 , data=serialized_students )
+        return response_handler(message = "Student list with mapping status fetched successfully" ,code = 200 , data=serialized_students , extra={"student_mapping" : StudentMappingLListSerializer(student_mapping).data} )
         
     
     def post(self, request, student_mapping_id):
