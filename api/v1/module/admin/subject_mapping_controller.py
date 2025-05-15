@@ -19,7 +19,7 @@ class MyFilterSet(filters.FilterSet):
 
     class Meta:
         model = SubjectMapping
-        fields = ['subject__name', 'term', 'batch', 'faculty__first_name', 'course']
+        fields = ['subject__name', 'term', 'batch', 'faculty__first_name', 'course' ,'is_active']
 
 
 class SubjectMappingPagination(PageNumberPagination):
