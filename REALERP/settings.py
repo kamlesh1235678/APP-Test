@@ -165,7 +165,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 SIMPLE_JWT = {
     # Token Lifetime Settings
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),  # Adjust as needed
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),  # Adjust as needed
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Adjust as needed
     "ROTATE_REFRESH_TOKENS": True,  # Option to issue a new refresh token upon refresh
     "BLACKLIST_AFTER_ROTATION": True,  # Blacklist old refresh tokens
