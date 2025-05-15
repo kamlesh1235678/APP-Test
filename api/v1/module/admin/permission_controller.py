@@ -11,6 +11,7 @@ from modules.privacy.models import *
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError , NotFound
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 
         
@@ -109,5 +110,34 @@ class RolePermissionAPIView(APIView):
                                 defaults = {})
         role_permission_obj.permission.set(permission)
         role_permission_obj.save()
+        # 🔒 Blocklist tokens for all users who have this role (Student or Employee)
+        try:
+            # Special case: if this role is assigned to Students
+            student_users = User.objects.filter(
+                student__student_role=role,
+                user_type=User.STUDENT
+            )
+
+            for user in student_users:
+                tokens = OutstandingToken.objects.filter(user=user)
+                for token in tokens:
+                    BlacklistedToken.objects.get_or_create(token=token)
+
+            # General case: if this role is assigned to Employees
+            employee_users = User.objects.filter(
+                employee__employee_role__in=[role],
+                user_type=User.EMPLOYEE
+            ).distinct()
+
+            for user in employee_users:
+                tokens = OutstandingToken.objects.filter(user=user)
+                for token in tokens:
+                    BlacklistedToken.objects.get_or_create(token=token)
+
+        except Exception as e:
+            print("Error blocklisting tokens:", e)
+
+
+        message = "Permissions updated successfully and user tokens blocklisted"
         message = "Permissions updated successfully"
         return response_handler(message=message , code = 200 , data={})

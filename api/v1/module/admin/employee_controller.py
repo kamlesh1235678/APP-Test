@@ -15,6 +15,7 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError , NotFound
 import pandas as pd
 from django.db import IntegrityError
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 
 class EmployeePagination(PageNumberPagination):
@@ -344,5 +345,12 @@ class EmployeeRoleListAPIView(APIView):
 
             # Replace all roles with the new ones
             employee.employee_role.set(roles)
+            try:
+                tokens = OutstandingToken.objects.filter(user=employee.user)  # assuming employee is linked to auth User
+                for token in tokens:
+                    BlacklistedToken.objects.get_or_create(token=token)
+            except Exception as e:
+                print("Error blocklisting tokens:", e)
+
             return Response({"message": "Roles updated successfully"})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
