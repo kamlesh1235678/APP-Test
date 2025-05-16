@@ -761,3 +761,26 @@ class StudentFinalResultAPIView(APIView):
 
 
         
+class SubjectMappingListFilterAPIView(APIView):
+    def get(self, request):
+        course = request.query_params.get('course')
+        batch = request.query_params.get('batch')
+        term = request.query_params.get('term')
+        filters = Q()
+        any_filter = False
+        if course:
+            filters &= Q(course__in=course)
+            any_filter = True
+        if batch:
+            filters &= Q(batch_id=batch)
+            any_filter = True
+        if term:
+            filters &= Q(term_id=term)
+            any_filter = True
+        if any_filter:
+            subjects =  SubjectMapping.objects.filter(filters)
+        else:
+            subjects =  SubjectMapping.objects.filter(is_active = True)
+        serializer_subjects = SubjectMappingListSerializer(subjects , many = True)
+        return response_handler(message="subject mapping list fetched successfully" , code = 200 , data = serializer_subjects.data)
+    

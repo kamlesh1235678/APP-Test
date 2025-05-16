@@ -151,6 +151,7 @@ urlpatterns = [
   path('employee-role-edit/<int:employee_id>' , EmployeeRoleListAPIView.as_view() ,name = "employee-role-edit"),
   path('subject-wise-component-marks/<int:subject_id>' , SubjectWiseComponentMarksAPIView.as_view() ,name = "subject-wise-component-marks"),
   path('student-mapping-edit/<int:student_mapping_id>' , StudentMappingEditAPIView.as_view() ,name = "student-mapping-edit"),
+  path('subject-mapping-list-filter' , SubjectMappingListFilterAPIView.as_view() ,name = "subject-mapping-list-filter"),
 ]
 
                                                                                                                                                                                          
