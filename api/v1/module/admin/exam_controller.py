@@ -177,6 +177,9 @@ class ExamSubjectMappingListAPIView(APIView):
             if not date:
                 errors.append(f"Date is required for subject: {subject_name}")
                 continue
+            if not duration:
+                errors.append(f"Duration is required for subject: {subject_name}")
+                continue
             # import pdb ; pdb.set_trace()
             # Update if exam already exists for the component, else create new
             exam_obj, created = Exam.objects.update_or_create(

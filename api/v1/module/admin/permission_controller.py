@@ -138,7 +138,5 @@ class RolePermissionAPIView(APIView):
         except Exception as e:
             print("Error blocklisting tokens:", e)
 
-
-        message = "Permissions updated successfully and user tokens blocklisted"
         message = "Permissions updated successfully"
         return response_handler(message=message , code = 200 , data={})

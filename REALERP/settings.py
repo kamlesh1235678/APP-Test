@@ -165,7 +165,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 SIMPLE_JWT = {
     # Token Lifetime Settings
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=10),  # Adjust as needed
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes= 60*60 ),  # Adjust as needed
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Adjust as needed
 
 }

@@ -33,7 +33,7 @@ def check_fee_status(view_func):
     @wraps(view_func)
     def _wrapped_view(self, request, student_id, term_id, type, *args, **kwargs):
         student = get_object_or_404(Student, id=student_id)
-        if type == "main":
+        if type != "main":
             fee_status = StudentFeeStatus.objects.filter(student=student).first()
             if not fee_status or not fee_status.program_fee_paid:
                 return response_handler(message = "Program fee not paid. Please pay to download hall ticket" , code = 400 ,data= {})
