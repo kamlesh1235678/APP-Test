@@ -519,7 +519,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
         if not batch_id or not term_id or not type:
             return response_handler(message="Missing required parameters", code=400, data={})
         obj, created = ExamResultAnnounce.objects.update_or_create(
-                batch = batch_id , term = term_id , type = type ,
+                batch = get_object_or_404(Batch , id = batch_id).id , term = get_object_or_404(Terms , id = term_id).id , type = type ,
                 defaults={
                     'is_active': True  
                 }
