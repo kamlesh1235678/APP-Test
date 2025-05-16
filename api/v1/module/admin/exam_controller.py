@@ -226,8 +226,8 @@ class HallTicketAnnounceModelViewSet(viewsets.ModelViewSet):
         try:
             return super().get_queryset()
         except:
-            message = "HallTicketAnnounce lsit fetch successfully"
-            return response_handler(message=message, code=400 , data= {})
+            message = "HallTicketAnnounce list fetch successfully"
+            return response_handler(message=message, code=400 , data= [])
         
     def create(self, request, *args, **kwargs):
         try:
