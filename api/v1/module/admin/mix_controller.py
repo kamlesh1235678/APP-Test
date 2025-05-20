@@ -194,7 +194,7 @@ class StudentSingleListAPIView(APIView):
             filters &= Q(course__id=course)
         if batch:
             filters &= Q(batch_id=batch)
-        student = Student.objects.filter(dropped = False , is_archived =  False , user__is_active = True , **filters).order_by('-id')
+        student = Student.objects.filter(dropped = False , is_archived =  False , user__is_active = True).filter(filters).order_by('-id')
         return Response({"message": "Student fetched successfully", "data": StudentMixSerializer(student, many=True).data})
 
 
@@ -208,7 +208,7 @@ class MembershipFilterAPIView(APIView):
             filters &= Q(course__id=course)
         if batch:
             filters &= Q(batch_id=batch)
-        students = Student.objects.filter(dropped = False , is_archived =  False , user__is_active = True , **filters).distinct().order_by('-id')
+        students = Student.objects.filter(dropped = False , is_archived =  False , user__is_active = True).filter(filters).distinct().order_by('-id')
         mentored_student_ids = FacultyMentorship.objects.filter(students__in=students).values_list('students__id', flat=True)
         students =  students.exclude(id__in=mentored_student_ids)
         students =  StudentMixSerializer(students , many= True)
