@@ -194,7 +194,7 @@ class StudentSingleListAPIView(APIView):
             filters &= Q(course__id=course)
         if batch:
             filters &= Q(batch_id=batch)
-        student = Student.objects.filter(filters).order_by('-id')
+        student = Student.objects.filter(dropped = False , is_archived =  False , user__is_active = True , **filters).order_by('-id')
         return Response({"message": "Student fetched successfully", "data": StudentMixSerializer(student, many=True).data})
 
 
@@ -208,7 +208,7 @@ class MembershipFilterAPIView(APIView):
             filters &= Q(course__id=course)
         if batch:
             filters &= Q(batch_id=batch)
-        students = Student.objects.filter(filters).distinct().order_by('-id')
+        students = Student.objects.filter(dropped = False , is_archived =  False , user__is_active = True , **filters).distinct().order_by('-id')
         mentored_student_ids = FacultyMentorship.objects.filter(students__in=students).values_list('students__id', flat=True)
         students =  students.exclude(id__in=mentored_student_ids)
         students =  StudentMixSerializer(students , many= True)
@@ -316,7 +316,7 @@ class EmployeeSummary(APIView):
 
 class StudentBatchwise(APIView):
     def get(self, request , batch):
-        student = Student.objects.filter(batch = batch)
+        student = Student.objects.filter(batch = batch , dropped = False , is_archived =  False , user__is_active = True)
         student = StudentMixSerializer(student ,many = True)
         return response_handler(message="student list fetched successfully" , code = 200 , data = student.data)
     
@@ -358,20 +358,23 @@ class ResitMainStudentListAPIView(APIView):
             student = Student.objects.filter(
                     student_mappings__batch_id=batch,
                     student_mappings__term_id=term,
+                    dropped = False , is_archived =  False , user__is_active = True
                 ).distinct().order_by('-id')
             return response_handler(message = "Student fetched successfully", data = StudentMixSerializer(student, many=True).data , code=200)
         elif type == "resit-1":
             student = Student.objects.filter(
                     resets__batch_id=batch,
                     resets__term_id=term ,
-                    resets__type = type
+                    resets__type = type,
+                    dropped = False , is_archived =  False , user__is_active = True
                 ).distinct().order_by('-id')
             return response_handler(message = "Student fetched successfully", data = StudentMixSerializer(student, many=True).data , code = 200)
         elif type == "resit-2":
             student = Student.objects.filter(
                     resets__batch_id=batch,
                     resets__term_id=term ,
-                    resets__type = type
+                    resets__type = type ,
+                    dropped = False , is_archived =  False , user__is_active = True
                 ).distinct().order_by('-id')
             return response_handler(message = "Student fetched successfully", data=  StudentMixSerializer(student, many=True).data , code=200)
         else:

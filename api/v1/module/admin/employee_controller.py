@@ -251,7 +251,7 @@ class FacultyMentorshipModelViewSet(viewsets.ModelViewSet):
             message = "Faculty Mentorship no found"
             return response_handler(message= message , code = 400 , data= {})
         
-    @action(detail=False, methods=['get'], url_path='students-by-faculty/(?P<faculty_id>\d+)')
+    @action(detail=False, methods=['get'], url_path='students-by-faculty/(?P<faculty_id>\\d+)')
     def students_by_faculty(self, request, faculty_id):
         faculty = get_object_or_404(Employee, id=faculty_id)
         mentorship = FacultyMentorship.objects.filter(user=faculty).first()

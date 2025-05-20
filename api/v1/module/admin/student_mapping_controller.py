@@ -18,7 +18,7 @@ class StudentMappingPagination(PageNumberPagination):
     def get_paginated_response(self, data):
         total_items = self.page.paginator.count
         if not total_items:
-            return Response({'message':'Student Mapping no found' , 'code':400 , 'data': {} , 'extra':{}})
+            return Response({'message':'Student Mapping no found' , 'code':400 , 'data': [] , 'extra':{}})
         if self.page_size:
             total_page = math.ceil(total_items/self.page_size)
         message = "Student Mapping list fetch successfully"

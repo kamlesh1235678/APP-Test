@@ -27,7 +27,7 @@ class ClassScheduledPagination(PageNumberPagination):
     def get_paginated_response(self, data):
         total_items = self.page.paginator.count
         if not total_items:
-            return Response({'message':'Class Scheduled no found' , 'code':400 , 'data': {} , 'extra':{}})
+            return Response({'message':'Class Scheduled no found' , 'code':400 , 'data': [] , 'extra':{}})
         if self.page_size:
             total_page = math.ceil(total_items/self.page_size)
         message = "Class Scheduled list fetch successfully"
@@ -197,9 +197,9 @@ class ClassAttendanceAPIView(APIView):
         specialization= class_schedule.mapping.specialization.all()
         type = class_schedule.mapping.type
         if type == "main":
-            students = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+            students = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization  , dropped = False , is_archived =  False , user__is_active = True).distinct()
         else:
-            students = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type).distinct()
+            students = Student.objects.filter(resets__batch=batch,resets__term=term,resets__course__in=course , resets__type= type ,  dropped = False , is_archived =  False , user__is_active = True).distinct()
         student_serializer = StudentAttendanceSerializer(instance = students , many = True)
         student_attendance = {attendance.student.id : {"is_persent": attendance.is_persent, "ce_marks": attendance.ce_marks} for attendance in Attendance.objects.filter(class_schedule = class_id)}
         for student in student_serializer.data:
@@ -223,9 +223,9 @@ class ClassAttendanceAPIView(APIView):
         specialization= class_schedule.mapping.specialization.all()
         type = class_schedule.mapping.type
         if type == "main":
-            students = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ).distinct()
+            students = Student.objects.filter(student_mappings__course__in = course , student_mappings__batch = batch , student_mappings__term = term , student_mappings__specialization__in = specialization ,  dropped = False , is_archived =  False , user__is_active = True ).distinct()
         else:
-            students = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , resets__type= type).distinct()
+            students = Student.objects.filter(resets__batch_id=batch,resets__term_id=term,resets__course__in=course , resets__type= type  ,  dropped = False , is_archived =  False , user__is_active = True).distinct()
         student_class_info = request.data.get("student_class_info" ,[])
         student_class_info_dict = {item['id'] : {"is_persent": item['is_persent'] , "ce_marks": item['ce_marks']} for item in student_class_info}
         is_valid = set(student_class_info_dict.keys()).issubset(set(students.values_list('id' , flat=True)))

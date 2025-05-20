@@ -29,7 +29,7 @@ class ExamPagination(PageNumberPagination):
     def get_paginated_response(self, data):
         total_items = self.page.paginator.count
         if not total_items:
-            return Response({'message':'Exam no found' , 'code':400 , 'data':{} , 'extra':{}})
+            return Response({'message':'Exam no found' , 'code':400 , 'data':[] , 'extra':{}})
         if self.page_size:
             total_page = math.ceil(total_items/self.page_size)
         message = "Exam List fetch successfully"
