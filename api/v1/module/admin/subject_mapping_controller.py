@@ -526,7 +526,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
             )
         if type == "main":
             student_mappings = StudentMapping.objects.filter(batch_id=batch_id,term_id=term_id,course__in = course_id)
-            students = Student.objects.filter(student_mappings__in=student_mappings).distinct()
+            students = Student.objects.filter(student_mappings__in=student_mappings , dropped = False , is_archived =  False , user__is_active = True).distinct()
             
             if not students.exists():
                 return response_handler(message="No students found in the given batch and term", code=400, data={})
@@ -578,7 +578,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                     )
             return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
         elif type == "resit-1":
-            students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type)
+            students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type , dropped = False , is_archived =  False , user__is_active = True)
             
             if not students.exists():
                 return response_handler(message="No students found in the given batch and term", code=400, data={})
@@ -637,7 +637,7 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
                     )
             return JsonResponse({"message": f"Term {type} result saved successfully",  "code" :200 ,"data": {} })
         elif type == "resit-2":
-            students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type)
+            students = Student.objects.filter(resets__batch_id=batch_id,resets__term_id=term_id,resets__course__in=course_id , resets__type= type , dropped = False , is_archived =  False , user__is_active = True)
             if not students.exists():
                 return response_handler(message="No students found in the given batch and term", code=400, data={})
             for student in students:
