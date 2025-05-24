@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from modules.administration.models import *
 from api.v1.module.serializers.mix_serializer import *
+from django.db.models import Max
 
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -90,9 +91,11 @@ class FinalSubjectResultSerializer(serializers.ModelSerializer):
     grade_point = serializers.SerializerMethodField()
     get_credit_xgp = serializers.SerializerMethodField()
     is_pass = serializers.SerializerMethodField()
+    max_in_subject = serializers.SerializerMethodField()
+    scaled_total_marks = serializers.SerializerMethodField()
     class Meta:
         model = FinalSubjectResult
-        fields = ['subject_name', 'subject_code', 'credit', 'total_marks' ,'grade', 'is_pass' ,'get_credit_xgp' , 'grade_point' ,'internal_marks' , 'external_marks' ]
+        fields = ['subject_name', 'subject_code', 'credit', 'total_marks' ,'grade', 'is_pass' ,'get_credit_xgp' , 'grade_point' ,'internal_marks' , 'external_marks' , 'max_in_subject' , 'scaled_total_marks' ]
 
     def get_subject_name(self, obj):
         if obj.subject_mapping:
@@ -105,13 +108,13 @@ class FinalSubjectResultSerializer(serializers.ModelSerializer):
             return obj.subject_mapping.subject.credit
     def get_total_marks(self, obj):
         if obj.total_marks:
-            return obj.total_marks
+            return round(obj.total_marks, 2)
     def get_external_marks(self, obj):
         if obj.external_marks:
-            return obj.external_marks
+            return round(obj.external_marks, 2)
     def get_internal_marks(self, obj):
         if obj.internal_marks:
-            return obj.internal_marks
+            return round(obj.internal_marks, 2)
     def get_grade_point(self, obj):
         if obj.grade_point:
             return obj.grade_point
@@ -124,4 +127,19 @@ class FinalSubjectResultSerializer(serializers.ModelSerializer):
     def get_is_pass(self, obj):
         if obj.is_pass:
             return obj.is_pass
+        
+    def get_max_in_subject(self, obj):
+        if obj.subject_mapping:
+            subject_id = obj.subject_mapping.id
+            max =  FinalSubjectResult.objects.filter(
+                subject_mapping_id=subject_id
+            ).aggregate(Max('total_marks'))['total_marks__max']
+            return round(max, 2)
+        return None
 
+    def get_scaled_total_marks(self, obj):
+        max_marks = self.get_max_in_subject(obj)
+        if obj.total_marks and max_marks and max_marks != 0:
+            scaled_total_marks = (float(obj.total_marks) / float(max_marks)) * 100
+            return round(scaled_total_marks, 2)
+        return None

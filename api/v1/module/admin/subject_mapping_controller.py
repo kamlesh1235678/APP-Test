@@ -741,6 +741,7 @@ class StudentFinalResultAPIView(APIView):
             )
 
         subject_data = FinalSubjectResult.objects.filter(final_result=final_result)
+        
         subject_serializer_data = FinalSubjectResultSerializer(subject_data, many=True)
 
         try:
