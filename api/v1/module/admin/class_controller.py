@@ -264,7 +264,8 @@ class SubjectAttendanceListAPIView(APIView):
     def get(self, request , subject_mapping_id):
         mapping_subject =  get_object_or_404(SubjectMapping , id = subject_mapping_id)
         attendance = Attendance.objects.filter( class_schedule__mapping =   mapping_subject)
-        students = Student.objects.filter(student_mappings__course__in = mapping_subject.course.all() , student_mappings__batch = mapping_subject.batch , student_mappings__term = mapping_subject.term , student_mappings__specialization__in = mapping_subject.specialization.all() ).distinct()
+        students = Student.objects.filter(student_mappings__course__in = mapping_subject.course.all() ,
+                                           student_mappings__batch = mapping_subject.batch , student_mappings__term = mapping_subject.term , student_mappings__specialization__in = mapping_subject.specialization.all() ).distinct().order_by('first_name')
         students_serializer = StudentAttendanceSerializer(students , many = True)
         complete_classes = mapping_subject.classes_completed
         for student in students_serializer.data:
