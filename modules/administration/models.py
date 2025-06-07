@@ -452,6 +452,8 @@ class ExamResultAnnounce(models.Model):
     is_active =  models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now= True)
+    exam_period = models.CharField(max_length=250 ,null= True , blank=True)
+    term_period = models.CharField(max_length=250 ,null= True , blank=True)
 
 
 class SubjectMappingNotes(models.Model):

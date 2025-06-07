@@ -516,12 +516,16 @@ class StudentFinalSubjectResultSavedAPIView(APIView):
         term_id = request.query_params.get('term')
         course_id = request.query_params.getlist('course') # courese is a list there 
         type = request.query_params.get('type')
-        if not batch_id or not term_id or not type:
+        exam_period = request.query_params.get('exam_period')
+        term_period = request.query_params.get('term_period')
+        if not batch_id or not term_id or not type or not exam_period or not term_period:
             return response_handler(message="Missing required parameters", code=400, data={})
         obj, created = ExamResultAnnounce.objects.update_or_create(
                 batch = get_object_or_404(Batch , id = batch_id) , term = get_object_or_404(Terms , id = term_id) , type = type ,
                 defaults={
-                    'is_active': True  
+                    'is_active': True ,
+                    'exam_period' :exam_period,
+                    'term_period': term_period
                 }
             )
         if type == "main":
@@ -730,7 +734,7 @@ class StudentFinalResultAPIView(APIView):
                 code=400,
                 data=None
             )
-
+        
         term_wise = FinalResult.objects.filter(student=student.id)
         final_result = term_wise.filter(result_type=result_type, term=term_id).first()
 
@@ -753,12 +757,13 @@ class StudentFinalResultAPIView(APIView):
                 code=400,
                 data=None
             )
-
+        exam_info = ExamResultAnnounce.objects.filter(type= result_type , term = term_id ,batch = student.batch).first()
         return response_handler(
             message="Result retrieved successfully",
             code=200,
             data=subject_serializer_data.data,
-            extra={'gpa': final_result.gpa, 'cgpa': cgpa , "student_name": f"{student.first_name} {student.middle_name} {student.last_name}" , "father_name": student.father_name ,"enrollment_number":enrollment_number , 'term_name':term_name , "batch": student.batch.name   }
+            extra={'gpa': final_result.gpa, 'cgpa': cgpa , "student_name": f"{student.first_name} {student.middle_name} {student.last_name}" , "father_name": student.father_name ,"enrollment_number":enrollment_number , 
+                   'term_name':term_name , "batch": student.batch.name , 'exam_period' : exam_info.exam_period  , "term_period": exam_info.term_period }
         )
 
 
