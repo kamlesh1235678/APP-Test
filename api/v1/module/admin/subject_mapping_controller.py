@@ -714,6 +714,7 @@ class StudentFinalResultAPIView(APIView):
         enrollment_number = request.data.get('enrollment_number')
         result_type = request.data.get('type')
         term_id = request.data.get('term')
+        term_name = get_object_or_404(Terms , id= term_id).name
 
         if not enrollment_number or not result_type or not term_id:
             return response_handler(
@@ -757,7 +758,7 @@ class StudentFinalResultAPIView(APIView):
             message="Result retrieved successfully",
             code=200,
             data=subject_serializer_data.data,
-            extra={'gpa': final_result.gpa, 'cgpa': cgpa}
+            extra={'gpa': final_result.gpa, 'cgpa': cgpa , "student_name": "{student.first_name}{student.middle_name}{student.last_name}" , "father_name": student.father_name ,"enrollment_number":enrollment_number , 'term_name':term_name , "batch": student.batch.name   }
         )
 
 
