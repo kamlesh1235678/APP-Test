@@ -762,7 +762,7 @@ class StudentFinalResultAPIView(APIView):
             message="Result retrieved successfully",
             code=200,
             data=subject_serializer_data.data,
-            extra={'gpa': final_result.gpa, 'cgpa': cgpa , "student_name": f"{student.first_name} {student.middle_name} {student.last_name}" , "father_name": student.father_name ,"enrollment_number":enrollment_number , 
+            extra={'gpa': round(final_result.gpa, 2), 'cgpa': cgpa , "student_name": f"{student.first_name} {student.middle_name + ' ' if student.middle_name else ''}{student.last_name}" , "father_name": student.father_name ,"enrollment_number":enrollment_number , 
                    'term_name':term_name , "batch": student.batch.name , 'exam_period' : exam_info.exam_period  , "term_period": exam_info.term_period }
         )
 
